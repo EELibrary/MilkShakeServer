@@ -621,12 +621,19 @@ public class ConcurrentDoublyLinkedList<E> extends AbstractCollection<E> impleme
 
     @Override
     public int indexOf(Object o) {
-        throw new NotImplementedException("INVALID");
+        int i = 0;
+        for (E e : this){
+            if (e.equals(o)){
+                return i;
+            }
+            ++i;
+        }
+        throw new NoSuchElementException("Element not found!");
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        throw new NotImplementedException("INVALID");
+        return indexOf(o) - 1;
     }
 
     @Override
