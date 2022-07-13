@@ -1,0 +1,44 @@
+--- ../src-base/minecraft/net/minecraft/pathfinding/PathHeap.java
++++ ../src-work/minecraft/net/minecraft/pathfinding/PathHeap.java
+@@ -5,7 +5,7 @@
+     private PathPoint[] pathPoints = new PathPoint[128];
+     private int count;
+ 
+-    public PathPoint addPoint(PathPoint point)
++    public synchronized PathPoint addPoint(PathPoint point)
+     {
+         if (point.index >= 0)
+         {
+@@ -27,12 +27,12 @@
+         }
+     }
+ 
+-    public void clearPath()
++    public synchronized void clearPath()
+     {
+         this.count = 0;
+     }
+ 
+-    public PathPoint dequeue()
++    public synchronized PathPoint dequeue()
+     {
+         PathPoint pathpoint = this.pathPoints[0];
+         this.pathPoints[0] = this.pathPoints[--this.count];
+@@ -47,7 +47,7 @@
+         return pathpoint;
+     }
+ 
+-    public void changeDistance(PathPoint point, float distance)
++    public synchronized void changeDistance(PathPoint point, float distance)
+     {
+         float f = point.distanceToTarget;
+         point.distanceToTarget = distance;
+@@ -144,7 +144,7 @@
+         pathpoint.index = index;
+     }
+ 
+-    public boolean isPathEmpty()
++    public synchronized boolean isPathEmpty()
+     {
+         return this.count == 0;
+     }
