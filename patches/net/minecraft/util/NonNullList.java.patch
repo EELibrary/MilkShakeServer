@@ -1,0 +1,28 @@
+--- ../src-base/minecraft/net/minecraft/util/NonNullList.java
++++ ../src-work/minecraft/net/minecraft/util/NonNullList.java
+@@ -7,6 +7,7 @@
+ import javax.annotation.Nonnull;
+ import javax.annotation.Nullable;
+ import org.apache.commons.lang3.Validate;
++import org.threadly.concurrent.collections.ConcurrentArrayList;
+ 
+ public class NonNullList<E> extends AbstractList<E>
+ {
+@@ -23,7 +24,7 @@
+         Validate.notNull(fill);
+         Object[] aobject = new Object[size];
+         Arrays.fill(aobject, fill);
+-        return new NonNullList<E>(Arrays.asList((E[])aobject), fill);
++        return new NonNullList<E>(new ConcurrentArrayList<>(Arrays.asList((E[])aobject)), fill);
+     }
+ 
+     public static <E> NonNullList<E> from(E defaultElementIn, E... elements)
+@@ -38,7 +39,7 @@
+ 
+     protected NonNullList(List<E> delegateIn, @Nullable E listType)
+     {
+-        this.delegate = delegateIn;
++        this.delegate = new ConcurrentArrayList<>(delegateIn);
+         this.defaultElement = listType;
+     }
+ 
