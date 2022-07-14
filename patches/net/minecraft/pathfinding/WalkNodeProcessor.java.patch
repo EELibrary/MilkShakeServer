@@ -1,6 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/pathfinding/WalkNodeProcessor.java
 +++ ../src-work/minecraft/net/minecraft/pathfinding/WalkNodeProcessor.java
-@@ -23,6 +23,7 @@
+@@ -14,6 +14,7 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.entity.EntityLiving;
+ import net.minecraft.init.Blocks;
++import net.minecraft.network.NetHandlerPlayServer;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.math.AxisAlignedBB;
+ import net.minecraft.util.math.BlockPos;
+@@ -23,6 +24,7 @@
  public class WalkNodeProcessor extends NodeProcessor
  {
      protected float avoidsWater;
@@ -8,7 +16,27 @@
  
      public void init(IBlockAccess sourceIn, EntityLiving mob)
      {
-@@ -295,7 +296,9 @@
+@@ -237,11 +239,19 @@
+                 {
+                     AxisAlignedBB axisalignedbb3 = new AxisAlignedBB((double)x - d1 + 0.5D, (double)y + 0.001D, (double)z - d1 + 0.5D, (double)x + d1 + 0.5D, (double)((float)y + this.entity.height), (double)z + d1 + 0.5D);
+ 
++                    if (this.entity == null){
++                        return null;
++                    }
++
+                     if (this.entity.world.collidesWithAnyBlock(axisalignedbb3))
+                     {
+                         return null;
+                     }
+ 
++                    if (this.entity == null){
++                        return null;
++                    }
++
+                     if (this.entity.width >= 1.0F)
+                     {
+                         PathNodeType pathnodetype1 = this.getPathNodeType(this.entity, x, y - 1, z);
+@@ -295,7 +305,9 @@
          PathNodeType pathnodetype = PathNodeType.BLOCKED;
          double d0 = (double)entitylivingIn.width / 2.0D;
          BlockPos blockpos = new BlockPos(entitylivingIn);
@@ -18,7 +46,7 @@
  
          if (enumset.contains(PathNodeType.FENCE))
          {
-@@ -399,6 +402,8 @@
+@@ -399,6 +411,8 @@
              {
                  pathnodetype = PathNodeType.DAMAGE_CACTUS;
              }
@@ -27,7 +55,7 @@
          }
  
          pathnodetype = this.checkNeighborBlocks(blockaccessIn, x, y, z, pathnodetype);
-@@ -417,16 +422,19 @@
+@@ -417,16 +431,19 @@
                  {
                      if (i != 0 || j != 0)
                      {
@@ -50,7 +78,7 @@
                      }
                  }
              }
-@@ -443,6 +451,9 @@
+@@ -443,6 +460,9 @@
          Block block = iblockstate.getBlock();
          Material material = iblockstate.getMaterial();
  
