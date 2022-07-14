@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/pathfinding/PathWorldListener.java
 +++ ../src-work/minecraft/net/minecraft/pathfinding/PathWorldListener.java
-@@ -13,10 +13,11 @@
+@@ -13,33 +13,26 @@
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.world.IWorldEventListener;
  import net.minecraft.world.World;
@@ -13,3 +13,31 @@
  
      public void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags)
      {
+         if (this.didBlockChange(worldIn, pos, oldState, newState))
+         {
+-            int i = 0;
+-
+-            for (int j = this.navigations.size(); i < j; ++i)
+-            {
+-                PathNavigate pathnavigate = this.navigations.get(i);
+-
+-                if (pathnavigate != null && !pathnavigate.canUpdatePathOnTimeout())
+-                {
++            for (PathNavigate pathnavigate : this.navigations) {
++                if (pathnavigate != null && !pathnavigate.canUpdatePathOnTimeout()) {
+                     Path path = pathnavigate.getPath();
+ 
+-                    if (path != null && !path.isFinished() && path.getCurrentPathLength() != 0)
+-                    {
++                    if (path != null && !path.isFinished() && path.getCurrentPathLength() != 0) {
+                         PathPoint pathpoint = pathnavigate.currentPath.getFinalPathPoint();
+-                        double d0 = pos.distanceSq(((double)pathpoint.x + pathnavigate.entity.posX) / 2.0D, ((double)pathpoint.y + pathnavigate.entity.posY) / 2.0D, ((double)pathpoint.z + pathnavigate.entity.posZ) / 2.0D);
++                        double d0 = pos.distanceSq(((double) pathpoint.x + pathnavigate.entity.posX) / 2.0D, ((double) pathpoint.y + pathnavigate.entity.posY) / 2.0D, ((double) pathpoint.z + pathnavigate.entity.posZ) / 2.0D);
+                         int k = (path.getCurrentPathLength() - path.getCurrentPathIndex()) * (path.getCurrentPathLength() - path.getCurrentPathIndex());
+ 
+-                        if (d0 < (double)k)
+-                        {
++                        if (d0 < (double) k) {
+                             pathnavigate.updatePath();
+                         }
+                     }
