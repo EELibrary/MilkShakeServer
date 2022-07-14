@@ -16,7 +16,17 @@
  
      public void init(IBlockAccess sourceIn, EntityLiving mob)
      {
-@@ -237,11 +239,19 @@
+@@ -189,6 +191,9 @@
+         PathPoint pathpoint = null;
+         BlockPos blockpos = new BlockPos(x, y, z);
+         BlockPos blockpos1 = blockpos.down();
++        if (this.blockaccess == null){
++            return null;
++        }
+         double d0 = (double)y - (1.0D - this.blockaccess.getBlockState(blockpos1).getBoundingBox(this.blockaccess, blockpos1).maxY);
+ 
+         if (d0 - p_186332_5_ > 1.125D)
+@@ -237,11 +242,19 @@
                  {
                      AxisAlignedBB axisalignedbb3 = new AxisAlignedBB((double)x - d1 + 0.5D, (double)y + 0.001D, (double)z - d1 + 0.5D, (double)x + d1 + 0.5D, (double)((float)y + this.entity.height), (double)z + d1 + 0.5D);
  
@@ -36,7 +46,7 @@
                      if (this.entity.width >= 1.0F)
                      {
                          PathNodeType pathnodetype1 = this.getPathNodeType(this.entity, x, y - 1, z);
-@@ -295,7 +305,9 @@
+@@ -295,7 +308,9 @@
          PathNodeType pathnodetype = PathNodeType.BLOCKED;
          double d0 = (double)entitylivingIn.width / 2.0D;
          BlockPos blockpos = new BlockPos(entitylivingIn);
@@ -46,7 +56,7 @@
  
          if (enumset.contains(PathNodeType.FENCE))
          {
-@@ -399,6 +411,8 @@
+@@ -399,6 +414,8 @@
              {
                  pathnodetype = PathNodeType.DAMAGE_CACTUS;
              }
@@ -55,7 +65,7 @@
          }
  
          pathnodetype = this.checkNeighborBlocks(blockaccessIn, x, y, z, pathnodetype);
-@@ -417,16 +431,19 @@
+@@ -417,16 +434,19 @@
                  {
                      if (i != 0 || j != 0)
                      {
@@ -78,7 +88,7 @@
                      }
                  }
              }
-@@ -443,6 +460,9 @@
+@@ -443,6 +463,9 @@
          Block block = iblockstate.getBlock();
          Material material = iblockstate.getMaterial();
  
