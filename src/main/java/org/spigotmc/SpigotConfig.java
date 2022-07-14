@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import gg.eilsapgroup.milkshake.MKConfig;
+import gg.eilsapgroup.milkshake.commands.ThreadsCommand;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -265,6 +266,7 @@ public class SpigotConfig
     private static void tpsCommand()
     {
         commands.put( "tps", new TicksPerSecondCommand( "tps" ) );
+        commands.put("threads",new ThreadsCommand());
     }
 
     public static int playerSample;
