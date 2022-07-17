@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerChunkMap.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerChunkMap.java
-@@ -1,18 +1,26 @@
+@@ -1,18 +1,24 @@
  package net.minecraft.server.management;
  
 +import catserver.server.AsyncCatcher;
@@ -12,12 +12,14 @@
 +import gg.eilsapgroup.milkshake.MKConfig;
  import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
  import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
- import java.util.Collections;
+-import java.util.Collections;
 -import java.util.Comparator;
- import java.util.Iterator;
-+import java.util.LinkedList;
- import java.util.List;
- import java.util.Set;
+-import java.util.Iterator;
+-import java.util.List;
+-import java.util.Set;
++
++import java.lang.reflect.Array;
++import java.util.*;
 +import java.util.concurrent.ConcurrentHashMap;
 +import java.util.concurrent.CopyOnWriteArrayList;
 +import java.util.concurrent.CountDownLatch;
@@ -29,7 +31,7 @@
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.ChunkPos;
-@@ -20,6 +28,7 @@
+@@ -20,6 +26,7 @@
  import net.minecraft.world.WorldProvider;
  import net.minecraft.world.WorldServer;
  import net.minecraft.world.chunk.Chunk;
@@ -37,7 +39,7 @@
  
  public class PlayerChunkMap
  {
-@@ -38,12 +47,12 @@
+@@ -38,12 +45,12 @@
          }
      };
      private final WorldServer world;
@@ -55,7 +57,7 @@
      private int playerViewRadius;
      private long previousTotalWorldTime;
      private boolean sortMissingChunks = true;
-@@ -52,7 +61,7 @@
+@@ -52,7 +59,7 @@
      public PlayerChunkMap(WorldServer serverWorld)
      {
          this.world = serverWorld;
@@ -64,7 +66,7 @@
      }
  
      public WorldServer getWorldServer()
-@@ -103,6 +112,8 @@
+@@ -103,6 +110,8 @@
          };
      }
  
@@ -73,17 +75,19 @@
      public void tick()
      {
          long i = this.world.getTotalWorldTime();
-@@ -111,20 +122,46 @@
+@@ -110,21 +119,48 @@
+         if (i - this.previousTotalWorldTime > 8000L)
          {
              this.previousTotalWorldTime = i;
- 
+-
 -            for (int j = 0; j < this.entries.size(); ++j)
 -            {
 -                PlayerChunkMapEntry playerchunkmapentry = this.entries.get(j);
 -                playerchunkmapentry.update();
 -                playerchunkmapentry.updateChunkInhabitedTime();
-+            final CountDownLatch latch = new CountDownLatch(this.entries.size());
-+            for (PlayerChunkMapEntry playerchunkmapentry : this.entries) {
++            final ArrayList<PlayerChunkMapEntry> copy3 = new ArrayList<>(this.entries);
++            final CountDownLatch latch = new CountDownLatch(copy3.size());
++            for (PlayerChunkMapEntry playerchunkmapentry : copy3) {
 +                chunkExecutor2.execute(()->{
 +                    AsyncCatcher.server_workers.add(Thread.currentThread());
 +                    try {
@@ -104,8 +108,10 @@
  
          if (!this.dirtyEntries.isEmpty())
          {
-+            final CountDownLatch latch2 = new CountDownLatch(this.dirtyEntries.size());
-             for (PlayerChunkMapEntry playerchunkmapentry2 : this.dirtyEntries)
+-            for (PlayerChunkMapEntry playerchunkmapentry2 : this.dirtyEntries)
++            final ArrayList<PlayerChunkMapEntry> copy2 = new ArrayList<>(this.dirtyEntries);
++            final CountDownLatch latch2 = new CountDownLatch(copy2.size());
++            for (PlayerChunkMapEntry playerchunkmapentry2 : copy2)
              {
 -                playerchunkmapentry2.update();
 +                chunkExecutor2.execute(()->{
@@ -126,7 +132,7 @@
  
              this.dirtyEntries.clear();
          }
-@@ -132,81 +169,95 @@
+@@ -132,81 +168,96 @@
          if (this.sortMissingChunks && i % 4L == 0L)
          {
              this.sortMissingChunks = false;
@@ -167,8 +173,9 @@
 +            org.spigotmc.SlackActivityAccountant activityAccountant = net.minecraft.server.MinecraftServer.getServerInst().slackActivityAccountant;
 +            activityAccountant.startActivity(Math.min(catserver.server.CatServer.getConfig().worldGenMaxTickTime, 18.75) / (18.75 * 2)); // CatServer - 50 * 0.375 = 18.75
 +            // Spigot end
-+            final CountDownLatch latch3 = new CountDownLatch(this.entriesWithoutChunks.size());
-+            for (PlayerChunkMapEntry playerchunkmapentry1 : this.entriesWithoutChunks) {
++            final ArrayList<PlayerChunkMapEntry> copy = new ArrayList<>(this.entriesWithoutChunks);
++            final CountDownLatch latch3 = new CountDownLatch(copy.size());
++            for (PlayerChunkMapEntry playerchunkmapentry1 : copy) {
 +                chunkExecutor2.execute(()->{
 +                    try {
 +                        AsyncCatcher.server_workers.add(Thread.currentThread());
@@ -288,7 +295,7 @@
      {
 -        return (PlayerChunkMapEntry)this.entryMap.get(getIndex(x, z));
 +        synchronized (this.entryMap) {
-+          return (PlayerChunkMapEntry) this.entryMap.get(getIndex(x, z));
++            return (PlayerChunkMapEntry) this.entryMap.get(getIndex(x, z));
 +        }
      }
  

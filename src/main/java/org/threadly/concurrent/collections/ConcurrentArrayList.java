@@ -1,13 +1,6 @@
 package org.threadly.concurrent.collections;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
-import java.util.RandomAccess;
+import java.util.*;
 
 import org.threadly.util.ArgumentVerifier;
 
@@ -44,7 +37,7 @@ import org.threadly.util.ArgumentVerifier;
  * @since 1.0.0
  * @param <T> type of object to retain
  */
-public class ConcurrentArrayList<T> implements List<T>, Deque<T>, RandomAccess {
+public class ConcurrentArrayList<T> extends ArrayList<T> implements Deque<T>, RandomAccess {
   private static final short HASH_CODE_PRIME_NUMBER = 31;
   private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
   

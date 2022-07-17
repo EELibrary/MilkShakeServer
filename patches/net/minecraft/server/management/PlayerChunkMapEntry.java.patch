@@ -26,7 +26,7 @@
 -    private Chunk chunk;
 -    private int changes;
 +    public Chunk chunk;
-+    private final AtomicInteger changes = new AtomicInteger(0);
++    private volatile int changes;
      private int changedSectionFilter;
      private long lastUpdateInhabitedTime;
      private boolean sentToPlayers;
@@ -92,12 +92,8 @@
          if (this.chunk != null)
          {
              return true;
-@@ -122,15 +148,18 @@
-         }
-         else
-         {
--            this.changes = 0;
-+            this.changes.set(0);
+@@ -125,12 +151,15 @@
+             this.changes = 0;
              this.changedSectionFilter = 0;
              this.sentToPlayers = true;
 +            if (this.players.isEmpty()) return true; // Forge: fix MC-120780
@@ -112,15 +108,7 @@
              }
  
              return true;
-@@ -162,26 +191,27 @@
-     {
-         if (this.sentToPlayers)
-         {
--            if (this.changes == 0)
-+            if (this.changes.get() == 0)
-             {
-                 this.playerChunkMap.entryChanged(this);
-             }
+@@ -169,7 +198,7 @@
  
              this.changedSectionFilter |= 1 << (y >> 4);
  
@@ -129,23 +117,17 @@
              {
                  short short1 = (short)(x << 12 | z << 8 | y);
  
--                for (int i = 0; i < this.changes; ++i)
-+                for (int i = 0; i < this.changes.get(); ++i)
-                 {
-                     if (this.changedBlocks[i] == short1)
-                     {
+@@ -180,7 +209,8 @@
                          return;
                      }
                  }
 -
--                this.changedBlocks[this.changes++] = short1;
-+                if (this.changes.get() == this.changedBlocks.length)
++                if (this.changes == this.changedBlocks.length)
 +                    this.changedBlocks = java.util.Arrays.copyOf(this.changedBlocks, this.changedBlocks.length << 1);
-+                this.changedBlocks[this.changes.incrementAndGet()] = short1;
+                 this.changedBlocks[this.changes++] = short1;
              }
          }
-     }
-@@ -197,48 +227,78 @@
+@@ -197,6 +227,7 @@
          }
      }
  
@@ -153,15 +135,7 @@
      public void update()
      {
          if (this.sentToPlayers && this.chunk != null)
-         {
--            if (this.changes != 0)
-+            if (this.changes.get() != 0)
-             {
--                if (this.changes == 1)
-+                if (this.changes.get() == 1)
-                 {
-                     int i = (this.changedBlocks[0] >> 12 & 15) + this.pos.x * 16;
-                     int j = this.changedBlocks[0] & 255;
+@@ -210,28 +241,57 @@
                      int k = (this.changedBlocks[0] >> 8 & 15) + this.pos.z * 16;
                      BlockPos blockpos = new BlockPos(i, j, k);
                      this.sendPacket(new SPacketBlockChange(this.playerChunkMap.getWorldServer(), blockpos));
@@ -174,7 +148,7 @@
                      }
                  }
 -                else if (this.changes == 64)
-+                else if (this.changes.get() >= net.minecraftforge.common.ForgeModContainer.clumpingThreshold)
++                else if (this.changes >= net.minecraftforge.common.ForgeModContainer.clumpingThreshold)
                  {
 -                    this.sendPacket(new SPacketChunkData(this.chunk, this.changedSectionFilter));
 +                    //TODO: FDix Mojang's fuckup to modded by combining all TE data into the chunk data packet... seriously... packet size explosion!
@@ -182,10 +156,10 @@
 +                        this.sendPacket(new SPacketChunkData(this.chunk, this.changedSectionFilter));
 +                    }catch (Throwable throwable) { // If out of buffer, try resend packet;
 +                        try {
-+                            this.sendPacket(new SPacketMultiBlockChange(this.changes.get(), this.changedBlocks, this.chunk));
++                            this.sendPacket(new SPacketMultiBlockChange(this.changes, this.changedBlocks, this.chunk));
 +                            //} Keep this in the else until we figure out a fix for mojang's derpitude on the data packet so we don't double send crap.
 +                            //{// Forge: Send only the tile entities that are updated, Adding this brace lets us keep the indent and the patch small
-+                            for (int l = 0; l < this.changes.get(); ++l)
++                            for (int l = 0; l < this.changes; ++l)
 +                            {
 +                                int i1 = (this.changedBlocks[l] >> 12 & 15) + this.pos.x * 16;
 +                                int j1 = this.changedBlocks[l] & 255;
@@ -207,13 +181,11 @@
                  }
                  else
                  {
--                    this.sendPacket(new SPacketMultiBlockChange(this.changes, this.changedBlocks, this.chunk));
+                     this.sendPacket(new SPacketMultiBlockChange(this.changes, this.changedBlocks, this.chunk));
 -
--                    for (int l = 0; l < this.changes; ++l)
-+                    this.sendPacket(new SPacketMultiBlockChange(this.changes.get(), this.changedBlocks, this.chunk));
 +                //} Keep this in the else until we figure out a fix for mojang's derpitude on the data packet so we don't double send crap.
 +                //{// Forge: Send only the tile entities that are updated, Adding this brace lets us keep the indent and the patch small
-+                    for (int l = 0; l < this.changes.get(); ++l)
+                     for (int l = 0; l < this.changes; ++l)
                      {
                          int i1 = (this.changedBlocks[l] >> 12 & 15) + this.pos.x * 16;
                          int j1 = this.changedBlocks[l] & 255;
@@ -226,14 +198,6 @@
                          {
                              this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(blockpos1));
                          }
-                     }
-                 }
- 
--                this.changes = 0;
-+                this.changes.set(0);
-                 this.changedSectionFilter = 0;
-             }
-         }
 @@ -311,4 +371,9 @@
  
          return d0;
