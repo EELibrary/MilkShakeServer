@@ -1,16 +1,32 @@
 --- ../src-base/minecraft/net/minecraft/pathfinding/PathHeap.java
 +++ ../src-work/minecraft/net/minecraft/pathfinding/PathHeap.java
-@@ -5,7 +5,7 @@
+@@ -5,16 +5,10 @@
      private PathPoint[] pathPoints = new PathPoint[128];
      private int count;
  
 -    public PathPoint addPoint(PathPoint point)
 +    public synchronized PathPoint addPoint(PathPoint point)
      {
-         if (point.index >= 0)
-         {
-@@ -27,12 +27,12 @@
+-        if (point.index >= 0)
+-        {
+-            throw new IllegalStateException("OW KNOWS!");
+-        }
+-        else
+-        {
+-            if (this.count == this.pathPoints.length)
+-            {
++        if (point.index < 0) {
++            if (this.count == this.pathPoints.length) {
+                 PathPoint[] apathpoint = new PathPoint[this.count << 1];
+                 System.arraycopy(this.pathPoints, 0, apathpoint, 0, this.count);
+                 this.pathPoints = apathpoint;
+@@ -23,16 +17,16 @@
+             this.pathPoints[this.count] = point;
+             point.index = this.count;
+             this.sortBack(this.count++);
+-            return point;
          }
++        return point;
      }
  
 -    public void clearPath()
@@ -24,7 +40,7 @@
      {
          PathPoint pathpoint = this.pathPoints[0];
          this.pathPoints[0] = this.pathPoints[--this.count];
-@@ -47,7 +47,7 @@
+@@ -47,7 +41,7 @@
          return pathpoint;
      }
  
@@ -33,7 +49,7 @@
      {
          float f = point.distanceToTarget;
          point.distanceToTarget = distance;
-@@ -144,7 +144,7 @@
+@@ -144,7 +138,7 @@
          pathpoint.index = index;
      }
  
