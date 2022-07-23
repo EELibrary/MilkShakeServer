@@ -9,6 +9,10 @@ import java.util.Set;
 import java.util.concurrent.RecursiveAction;
 import java.util.function.Consumer;
 
+/**
+ * 一个非常简单的无返回值的并行列表任务
+ * @param <E>
+ */
 public class ParallelListTraverse<E> extends RecursiveAction {
 
     private final List<E> list;
@@ -52,6 +56,9 @@ public class ParallelListTraverse<E> extends RecursiveAction {
         this.end = list.size();
     }
 
+    /**
+     * 最主要的部分
+     */
     @Override
     protected void compute() {
         AsyncCatcher.server_workers.add(Thread.currentThread());
