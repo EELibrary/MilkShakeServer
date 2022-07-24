@@ -911,9 +911,9 @@
 -    public void updateEntities()
 -    {
 +    //MilkShake -- Parallel entities updating XD
-+    private final ForkJoinPool weatherEffectsEx = new ForkJoinPool(MKConfig.parallelCount,MKConfig.serverWorkerFactory,null,true);
-+    private final ForkJoinPool entityPool = new ForkJoinPool(MKConfig.parallelCount,MKConfig.serverWorkerFactory,null,true);
-+    private final ForkJoinPool tileEntityPool = new ForkJoinPool(MKConfig.parallelCount,MKConfig.serverWorkerFactory,null,true);
++    private final ForkJoinPool weatherEffectsEx = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
++    private final ForkJoinPool entityPool = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
++    private final ForkJoinPool tileEntityPool = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
 +
 +    public void updateEntities() {
 +        final Phaser phaser = new Phaser();

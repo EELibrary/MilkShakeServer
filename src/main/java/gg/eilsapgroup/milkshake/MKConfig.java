@@ -1,64 +1,45 @@
 package gg.eilsapgroup.milkshake;
 
-import com.google.gson.internal.Streams;
 import gg.eilsapgroup.milkshake.executor.MiscWorkerWrapper;
 import gg.eilsapgroup.milkshake.executor.ServerWorkerWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.CraftServer;
-import org.lwjgl.Sys;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 
+/**
+ * Emmmm，说实话我也不知道是不是我写的出问题了，每次初始化配置文件的时候写到文件里的就总是只有两个大括号
+ */
 public class MKConfig {
-    public static int parallelCount = Runtime.getRuntime().availableProcessors();
     public static final ServerWorkerWrapper serverWorkerFactory = new ServerWorkerWrapper();
     public static final MiscWorkerWrapper serverMiscWorkerWrapper = new MiscWorkerWrapper();
     public static final YamlConfiguration config = new YamlConfiguration();
     public static ConfigurationSection executorConfig = null;
     public static final Logger LOGGER = LogManager.getLogger();
+    public static boolean disableAsyncCatcher = false;
 
     public static void init(){
-        /*try{
-            FileInputStream stream = readFile("mkconfig.yml");
-            if (stream!=null){
-                LOGGER.info("Config file detected!Reading");
-                byte[] buffer = new byte[stream.available()];
-                stream.read(buffer);
-                config.loadFromString(new String(buffer));
-                executorConfig = config.getConfigurationSection("executor");
-                parallelCount = executorConfig.getInt("threadcount");
+        try{
+            File configFile = new File("MKConfig.yml");
+            if (!configFile.exists()){
+                configFile.createNewFile();
+                executorConfig = config.createSection("executors");
+                executorConfig.set("entities-worker-threads",Runtime.getRuntime().availableProcessors()+2);
+                executorConfig.set("tracker-worker-threads",Runtime.getRuntime().availableProcessors());
+                executorConfig.set("env-worker-threads",Runtime.getRuntime().availableProcessors());
+                executorConfig.set("disable-async-catcher",false);
+                config.save(configFile);
                 return;
             }
-            LOGGER.info("Creating config server");
-            File file = new File("mkconfig.yml");
-            file.createNewFile();
-            executorConfig = config.createSection("executor");
-            executorConfig.addDefault("threadcount",Runtime.getRuntime().availableProcessors());
-            String s = config.saveToString();
-            FileWriter writer = new FileWriter(file);
-            writer.write(s);
-            writer.flush();
-            writer.close();
+            config.load(configFile);
+            executorConfig = config.getConfigurationSection("executors");
+            disableAsyncCatcher = executorConfig.getBoolean("disable-async-catcher");
         }catch (Exception e){
-            LOGGER.error(e);
-            System.exit(-1);
+            e.printStackTrace();
         }
-         */
     }
 
-    public static FileInputStream readFile(String fileName){
-        File file = new File(fileName);
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            return fis;
-        } catch (FileNotFoundException e) {
-            return null;
-        }
-    }
 }

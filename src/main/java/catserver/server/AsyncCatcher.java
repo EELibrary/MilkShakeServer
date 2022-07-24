@@ -1,5 +1,6 @@
 package catserver.server;
 
+import gg.eilsapgroup.milkshake.MKConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -21,6 +22,9 @@ public class AsyncCatcher {
     public static final Set<Thread> server_workers = ConcurrentHashMap.newKeySet();
 
     public static boolean checkAsync(String reason) {
+        if (MKConfig.disableAsyncCatcher){
+            return false;
+        }
         if (org.spigotmc.AsyncCatcher.enabled && !isMainThread() && !server_workers.contains(Thread.currentThread())) {
             if (!CatServer.getConfig().disableAsyncCatchWarn) {
                 CatServer.log.warn("A Mod/Plugin try to async " + reason + ", it will be executed safely on the main server thread until return!");

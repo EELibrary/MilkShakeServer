@@ -114,7 +114,7 @@
          }
      }
  
-+    private static final ForkJoinPool trackerExecutor = new ForkJoinPool(MKConfig.parallelCount,MKConfig.serverWorkerFactory,null,true);
++    private static final ForkJoinPool trackerExecutor = new ForkJoinPool(MKConfig.executorConfig.getInt("tracker-worker-threads"),MKConfig.serverWorkerFactory,null,true);
 +
      public void tick()
      {
