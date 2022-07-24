@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/pathfinding/PathPoint.java
++++ ../src-work/minecraft/net/minecraft/pathfinding/PathPoint.java
+@@ -11,7 +11,7 @@
+     public final int y;
+     public final int z;
+     private final int hash;
+-    public int index = -1;
++    public volatile int index = -1;
+     public float totalPathDistance;
+     public float distanceToNext;
+     public float distanceToTarget;

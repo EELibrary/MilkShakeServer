@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/pathfinding/PathNavigateClimber.java
++++ ../src-work/minecraft/net/minecraft/pathfinding/PathNavigateClimber.java
+@@ -51,7 +51,7 @@
+         }
+         else
+         {
+-            if (this.targetPosition != null)
++            if (this.targetPosition != null && this.entity != null)
+             {
+                 double d0 = (double)(this.entity.width * this.entity.width);
+ 
