@@ -39,7 +39,7 @@ public class ParallelListTraverse<E> extends RecursiveAction {
 
     public ParallelListTraverse(List<E> list, int threads,Consumer<E> action) {
         if (threads <=0){
-            throw new TaskException();
+            throw new TaskException("Invalid arg input!");
         }
         this.action = action;
         this.list = list;
@@ -56,8 +56,8 @@ public class ParallelListTraverse<E> extends RecursiveAction {
     protected void compute() {
         AsyncCatcher.server_workers.add(Thread.currentThread());
         try {
-            if (end - start < this.threshold) {
-                for (int i = start; i < end; i++) {
+            if (this.end - this.start < this.threshold) {
+                for (int i = this.start; i < this.end; i++) {
                     try {
                         this.action.accept(list.get(i));
                     } catch (Exception e) {
@@ -65,8 +65,8 @@ public class ParallelListTraverse<E> extends RecursiveAction {
                     }
                 }
             } else {
-                int middle = (start + end) / 2;
-                invokeAll(new ParallelListTraverse<>(list, this.action, start, middle, this.threshold), new ParallelListTraverse<>(list, this.action, middle, end, this.threshold));
+                int middle = (this.start + this.end) / 2;
+                invokeAll(new ParallelListTraverse<>(this.list, this.action, this.start, middle, this.threshold), new ParallelListTraverse<>(this.list, this.action, middle, this.end, this.threshold));
             }
         } catch (Exception e) {
             e.printStackTrace();
