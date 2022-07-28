@@ -16,7 +16,13 @@
  
      public void init(IBlockAccess sourceIn, EntityLiving mob)
      {
-@@ -189,6 +191,9 @@
+@@ -184,11 +186,14 @@
+     }
+ 
+     @Nullable
+-    private PathPoint getSafePoint(int x, int y, int z, int p_186332_4_, double p_186332_5_, EnumFacing facing)
++    private synchronized PathPoint getSafePoint(int x, int y, int z, int p_186332_4_, double p_186332_5_, EnumFacing facing)
+     {
          PathPoint pathpoint = null;
          BlockPos blockpos = new BlockPos(x, y, z);
          BlockPos blockpos1 = blockpos.down();
@@ -46,7 +52,22 @@
                      if (this.entity.width >= 1.0F)
                      {
                          PathNodeType pathnodetype1 = this.getPathNodeType(this.entity, x, y - 1, z);
-@@ -295,7 +308,9 @@
+@@ -271,6 +284,7 @@
+ 
+                         if (pathnodetype != PathNodeType.OPEN && f >= 0.0F)
+                         {
++                            if (pathpoint == null)continue;
+                             pathpoint = this.openPoint(x, y, z);
+                             pathpoint.nodeType = pathnodetype;
+                             pathpoint.costMalus = Math.max(pathpoint.costMalus, f);
+@@ -291,11 +305,16 @@
+ 
+     public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn)
+     {
++        if (entitylivingIn == null){
++            return PathNodeType.BLOCKED;
++        }
+         EnumSet<PathNodeType> enumset = EnumSet.<PathNodeType>noneOf(PathNodeType.class);
          PathNodeType pathnodetype = PathNodeType.BLOCKED;
          double d0 = (double)entitylivingIn.width / 2.0D;
          BlockPos blockpos = new BlockPos(entitylivingIn);
@@ -56,7 +77,16 @@
  
          if (enumset.contains(PathNodeType.FENCE))
          {
-@@ -399,6 +414,8 @@
+@@ -329,7 +348,7 @@
+         }
+     }
+ 
+-    public PathNodeType getPathNodeType(IBlockAccess p_193577_1_, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoorsIn, boolean canEnterDoorsIn, EnumSet<PathNodeType> p_193577_10_, PathNodeType p_193577_11_, BlockPos p_193577_12_)
++    public synchronized PathNodeType getPathNodeType(IBlockAccess p_193577_1_, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoorsIn, boolean canEnterDoorsIn, EnumSet<PathNodeType> p_193577_10_, PathNodeType p_193577_11_, BlockPos p_193577_12_)
+     {
+         for (int i = 0; i < xSize; ++i)
+         {
+@@ -399,6 +418,8 @@
              {
                  pathnodetype = PathNodeType.DAMAGE_CACTUS;
              }
@@ -65,7 +95,7 @@
          }
  
          pathnodetype = this.checkNeighborBlocks(blockaccessIn, x, y, z, pathnodetype);
-@@ -417,16 +434,19 @@
+@@ -417,16 +438,19 @@
                  {
                      if (i != 0 || j != 0)
                      {
@@ -88,7 +118,7 @@
                      }
                  }
              }
-@@ -443,6 +463,9 @@
+@@ -443,6 +467,9 @@
          Block block = iblockstate.getBlock();
          Material material = iblockstate.getMaterial();
  

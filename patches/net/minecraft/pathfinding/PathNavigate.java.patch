@@ -52,7 +52,7 @@
  
      public boolean setPath(@Nullable Path pathentityIn, double speedIn)
      {
-@@ -258,6 +277,11 @@
+@@ -258,8 +277,16 @@
          int l = MathHelper.ceil(this.entity.height);
          int i1 = k;
  
@@ -63,8 +63,13 @@
 +
          for (int j1 = i - 1; j1 >= this.currentPath.getCurrentPathIndex(); --j1)
          {
++            if (this.currentPath == null){
++                continue;
++            }
              if (this.isDirectPathBetweenPoints(vec3d, this.currentPath.getVectorFromIndex(this.entity, j1), k, l, i1))
-@@ -317,6 +341,7 @@
+             {
+                 this.currentPath.setCurrentPathIndex(j1);
+@@ -317,6 +344,7 @@
  
      public void clearPath()
      {

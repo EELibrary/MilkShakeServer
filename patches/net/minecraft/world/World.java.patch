@@ -1021,7 +1021,7 @@
 -            if (entity3 != null)
 -            {
 -                if (!entity3.isDead && entity3.isPassenger(entity2))
-+        ParallelListTraverse<Entity> task0 = new ParallelListTraverse<>(new ArrayList<>(this.weatherEffects),this.weatherEffectsEx.getParallelism(),entity->{
++        ParallelListTraverse<Entity> weather_effects_tick_task = new ParallelListTraverse<>(new ArrayList<>(this.weatherEffects),this.weatherEffectsEx.getParallelism(),entity->{
 +            phaser.register();
 +            try{
 +                if (entity == null)return;
@@ -1063,7 +1063,7 @@
  
 -            this.profiler.endSection();
 -            this.profiler.startSection("remove");
-+        this.weatherEffectsEx.execute(task0);
++        this.weatherEffectsEx.execute(weather_effects_tick_task);
  
 -            if (entity2.isDead)
 -            {
@@ -1118,7 +1118,7 @@
 -                BlockPos blockpos = tileentity.getPos();
 -
 -                if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos))
-+        ParallelListTraverse<Entity> task4 = new ParallelListTraverse<>(new ArrayList<Entity>(this.loadedEntityList),this.entityPool.getParallelism(),entity2->{
++        ParallelListTraverse<Entity> entity_tick_task = new ParallelListTraverse<>(new ArrayList<Entity>(this.loadedEntityList),this.entityPool.getParallelism(),entity2->{
 +            try{
 +                phaser.register();
 +                if (!entityLimiter.shouldContinue() || skipTheWorldEntityTick)return;
@@ -1169,7 +1169,7 @@
 +                phaser.arrive();
              }
 +        });
-+        this.entityPool.execute(task4);
++        this.entityPool.execute(entity_tick_task);
  
 -            if (tileentity.isInvalid())
 -            {
@@ -1200,7 +1200,7 @@
 +            this.tileEntitiesToBeRemoved.clear();
          }
  
-+        ParallelListTraverse<TileEntity> task2 = new ParallelListTraverse<>(new ArrayList<>(this.tickableTileEntities),this.tileEntityPool.getParallelism(),tileentity->{
++        ParallelListTraverse<TileEntity> tile_tick_task = new ParallelListTraverse<>(new ArrayList<>(this.tickableTileEntities),this.tileEntityPool.getParallelism(),tileentity->{
 +            phaser.register();
 +            try{
 +                tickTileEntity(tileentity,shouldSkipTick);
@@ -1209,7 +1209,7 @@
 +            }
 +        });
 +
-+        tileEntityPool.execute(task2);
++        tileEntityPool.execute(tile_tick_task);
 +
 +        timings.tileEntityTick.stopTiming(); // Spigot
 +        timings.tileEntityPending.startTiming(); // Spigot
@@ -1227,7 +1227,7 @@
 -                    if (!this.loadedTileEntityList.contains(tileentity1))
 -                    {
 -                        this.addTileEntity(tileentity1);
-+            ParallelListTraverse<TileEntity> task3 = new ParallelListTraverse<>(new ArrayList<>(this.addedTileEntityList),this.tileEntityPool.getParallelism(),tileentity1->{
++            ParallelListTraverse<TileEntity> tile_tick_task_2 = new ParallelListTraverse<>(new ArrayList<>(this.addedTileEntityList),this.tileEntityPool.getParallelism(),tileentity1->{
 +                phaser.register();
 +                try {
 +                    if (!tileentity1.isInvalid()) {
@@ -1257,7 +1257,7 @@
 -            }
 -
 +            });
-+            tileEntityPool.execute(task3);
++            tileEntityPool.execute(tile_tick_task_2);
              this.addedTileEntityList.clear();
          }
  
