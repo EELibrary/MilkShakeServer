@@ -110,7 +110,7 @@
          if (entityIn instanceof EntityPlayerMP)
          {
              EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
-@@ -281,12 +264,13 @@
+@@ -281,37 +264,45 @@
          }
      }
  
@@ -123,17 +123,29 @@
  
 -        for (EntityTrackerEntry entitytrackerentry : this.entries)
 -        {
+-            entitytrackerentry.updatePlayerList(this.world.playerEntities);
 +        ParallelListTraverse<EntityTrackerEntry> task = new ParallelListTraverse<>(this.entries,trackerExecutor.getParallelism(),entitytrackerentry->{
-             entitytrackerentry.updatePlayerList(this.world.playerEntities);
++            MKConfig.workerGroup.regThread();
++            try{
++                entitytrackerentry.updatePlayerList(this.world.playerEntities);
  
-             if (entitytrackerentry.playerEntitiesUpdated)
-@@ -295,23 +279,20 @@
- 
-                 if (entity instanceof EntityPlayerMP)
+-            if (entitytrackerentry.playerEntitiesUpdated)
+-            {
+-                Entity entity = entitytrackerentry.getTrackedEntity();
+-
+-                if (entity instanceof EntityPlayerMP)
++                if (entitytrackerentry.playerEntitiesUpdated)
                  {
 -                    list.add((EntityPlayerMP)entity);
-+                    tempCacheSet.add((EntityPlayerMP)entity);
++                    Entity entity = entitytrackerentry.getTrackedEntity();
++
++                    if (entity instanceof EntityPlayerMP)
++                    {
++                        tempCacheSet.add((EntityPlayerMP)entity);
++                    }
                  }
++            }finally {
++                MKConfig.workerGroup.removeThread();
              }
 -        }
 +        });
@@ -147,11 +159,17 @@
 -            {
 -                if (entitytrackerentry1.getTrackedEntity() != entityplayermp)
 -                {
+-                    entitytrackerentry1.updatePlayerEntity(entityplayermp);
 +        ParallelListTraverse<EntityPlayerMP> task2 = new ParallelListTraverse<EntityPlayerMP>(tempCacheSet,trackerExecutor.getParallelism(),entityplayermp->{
-+            for (EntityTrackerEntry entitytrackerentry1 : this.entries) {
-+                if (entitytrackerentry1.getTrackedEntity() != entityplayermp) {
-                     entitytrackerentry1.updatePlayerEntity(entityplayermp);
++            MKConfig.workerGroup.regThread();
++            try{
++                for (EntityTrackerEntry entitytrackerentry1 : this.entries) {
++                    if (entitytrackerentry1.getTrackedEntity() != entityplayermp) {
++                        entitytrackerentry1.updatePlayerEntity(entityplayermp);
++                    }
                  }
++            }finally {
++                MKConfig.workerGroup.removeThread();
              }
 -        }
 +        });
@@ -159,7 +177,7 @@
      }
  
      public void updateVisibility(EntityPlayerMP player)
-@@ -339,6 +320,25 @@
+@@ -339,6 +330,25 @@
          }
      }
  

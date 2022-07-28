@@ -1,4 +1,4 @@
-## 简介
+## MilkShakeServer
 一个简单地基于Catserver的半多线程服务端，兼容性不太好，主要本人也没开发经验而且就刚学java(
 ## 构建
 打开你的终端然后到这个目录，运行./graldew setup然后./gradlew build(如果你修改了MC部分的源码，在build之前请先运行一下genPatches)

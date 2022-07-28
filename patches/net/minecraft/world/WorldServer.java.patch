@@ -517,7 +517,7 @@
 -                                this.profiler.startSection("randomTick");
 +                                chunkExecutor.execute(()->{
 +                                    try{
-+                                        AsyncCatcher.server_workers.add(Thread.currentThread());
++                                        MKConfig.workerGroup.regThread();
 +                                        IBlockState iblockstate = extendedblockstorage.get(k1, i2, l1);
 +                                        Block block = iblockstate.getBlock();
 +                                        this.profiler.startSection("randomTick");
@@ -535,7 +535,7 @@
 +                                        this.profiler.endSection();
 +                                    }finally {
 +                                        phaser.arrive();
-+                                        AsyncCatcher.server_workers.remove(Thread.currentThread());
++                                        MKConfig.workerGroup.removeThread();
 +                                    }
 +                                });
                              }

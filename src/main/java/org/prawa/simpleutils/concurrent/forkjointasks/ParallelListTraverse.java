@@ -2,6 +2,7 @@ package org.prawa.simpleutils.concurrent.forkjointasks;
 
 import catserver.server.AsyncCatcher;
 import com.google.common.collect.Lists;
+import gg.eilsapgroup.milkshake.MKConfig;
 import gg.eilsapgroup.milkshake.TaskException;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class ParallelListTraverse<E> extends RecursiveAction {
 
     @Override
     protected void compute() {
-        AsyncCatcher.server_workers.add(Thread.currentThread());
+        MKConfig.workerGroup.regThread();
         try {
             if (this.end - this.start < this.threshold) {
                 for (int i = this.start; i < this.end; i++) {
@@ -71,7 +72,7 @@ public class ParallelListTraverse<E> extends RecursiveAction {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            AsyncCatcher.server_workers.remove(Thread.currentThread());
+            MKConfig.workerGroup.removeThread();
         }
     }
 }

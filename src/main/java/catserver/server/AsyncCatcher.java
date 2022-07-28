@@ -16,16 +16,14 @@ import java.util.function.Supplier;
 
 public class AsyncCatcher {
     public static boolean isMainThread() {
-        return Thread.currentThread() == MinecraftServer.getServerInst().primaryThread || server_workers.contains(Thread.currentThread());
+        return Thread.currentThread() == MinecraftServer.getServerInst().primaryThread || MKConfig.workerGroup.contains();
     }
-
-    public static final Set<Thread> server_workers = ConcurrentHashMap.newKeySet();
 
     public static boolean checkAsync(String reason) {
         if (MKConfig.disableAsyncCatcher){
             return false;
         }
-        if (org.spigotmc.AsyncCatcher.enabled && !isMainThread() && !server_workers.contains(Thread.currentThread())) {
+        if (org.spigotmc.AsyncCatcher.enabled && !isMainThread() && !MKConfig.workerGroup.contains()) {
             if (!CatServer.getConfig().disableAsyncCatchWarn) {
                 CatServer.log.warn("A Mod/Plugin try to async " + reason + ", it will be executed safely on the main server thread until return!");
                 CatServer.log.warn("Please check the stacktrace in debug.log and report the author.");

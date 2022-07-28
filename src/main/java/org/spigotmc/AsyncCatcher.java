@@ -10,7 +10,7 @@ public class AsyncCatcher
 
     public static void catchOp(String reason)
     {
-        if ( enabled && Thread.currentThread() != MinecraftServer.getServerInst().primaryThread && !catserver.server.AsyncCatcher.server_workers.contains(Thread.currentThread()))
+        if ( enabled && Thread.currentThread() != MinecraftServer.getServerInst().primaryThread && !MKConfig.workerGroup.contains())
         {
             if (MKConfig.disableAsyncCatcher){
                 return;

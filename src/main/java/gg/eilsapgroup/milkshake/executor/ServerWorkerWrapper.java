@@ -16,7 +16,7 @@ public class ServerWorkerWrapper implements ForkJoinPool.ForkJoinWorkerThreadFac
         fjwt.setDaemon(true);
         fjwt.setUncaughtExceptionHandler(handler);
         handler.onThreadRegisted();
-        fjwt.setName("MilkShake-Worker # "+threadId.getAndIncrement());
+        fjwt.setName("MilkShake-Main-Worker # "+threadId.getAndIncrement());
         return fjwt;
     }
 

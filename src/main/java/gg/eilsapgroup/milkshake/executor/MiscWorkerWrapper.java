@@ -1,5 +1,6 @@
 package gg.eilsapgroup.milkshake.executor;
 
+import gg.eilsapgroup.milkshake.MKConfig;
 import gg.eilsapgroup.milkshake.handler.ServerWorkerExceptionHandler;
 
 import java.util.concurrent.ThreadFactory;
@@ -11,7 +12,14 @@ public class MiscWorkerWrapper implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
-        Thread thread = new Thread(r,"MilkShake-Worker # "+threadId.getAndIncrement());
+        Thread thread = new Thread(()->{
+            MKConfig.workerGroup.regThread();
+            try{
+                r.run();
+            }finally {
+                MKConfig.workerGroup.removeThread();
+            }
+        },"MilkShake-Misc-Worker # "+threadId.getAndIncrement());
         handler.onThreadRegisted();
         thread.setUncaughtExceptionHandler(handler);
         thread.setDaemon(true);
