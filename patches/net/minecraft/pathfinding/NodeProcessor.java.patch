@@ -1,0 +1,68 @@
+--- ../src-base/minecraft/net/minecraft/pathfinding/NodeProcessor.java
++++ ../src-work/minecraft/net/minecraft/pathfinding/NodeProcessor.java
+@@ -17,7 +17,7 @@
+     protected boolean canOpenDoors;
+     protected boolean canSwim;
+ 
+-    public void init(IBlockAccess sourceIn, EntityLiving mob)
++    public synchronized void init(IBlockAccess sourceIn, EntityLiving mob)
+     {
+         this.blockaccess = sourceIn;
+         this.entity = mob;
+@@ -27,7 +27,7 @@
+         this.entitySizeZ = MathHelper.floor(mob.width + 1.0F);
+     }
+ 
+-    public void postProcess()
++    public synchronized void postProcess()
+     {
+         this.blockaccess = null;
+         this.entity = null;
+@@ -47,7 +47,7 @@
+         return pathpoint;
+     }
+ 
+-    public abstract PathPoint getStart();
++    public  abstract PathPoint getStart();
+ 
+     public abstract PathPoint getPathPointToCoords(double x, double y, double z);
+ 
+@@ -57,32 +57,32 @@
+ 
+     public abstract PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z);
+ 
+-    public void setCanEnterDoors(boolean canEnterDoorsIn)
++    public synchronized void setCanEnterDoors(boolean canEnterDoorsIn)
+     {
+         this.canEnterDoors = canEnterDoorsIn;
+     }
+ 
+-    public void setCanOpenDoors(boolean canOpenDoorsIn)
++    public synchronized void setCanOpenDoors(boolean canOpenDoorsIn)
+     {
+         this.canOpenDoors = canOpenDoorsIn;
+     }
+ 
+-    public void setCanSwim(boolean canSwimIn)
++    public synchronized void setCanSwim(boolean canSwimIn)
+     {
+         this.canSwim = canSwimIn;
+     }
+ 
+-    public boolean getCanEnterDoors()
++    public synchronized boolean getCanEnterDoors()
+     {
+         return this.canEnterDoors;
+     }
+ 
+-    public boolean getCanOpenDoors()
++    public synchronized boolean getCanOpenDoors()
+     {
+         return this.canOpenDoors;
+     }
+ 
+-    public boolean getCanSwim()
++    public synchronized boolean getCanSwim()
+     {
+         return this.canSwim;
+     }
