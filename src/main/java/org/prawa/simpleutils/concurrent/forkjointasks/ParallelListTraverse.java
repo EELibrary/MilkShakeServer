@@ -1,10 +1,8 @@
 package org.prawa.simpleutils.concurrent.forkjointasks;
 
-import catserver.server.AsyncCatcher;
-import com.google.common.collect.Lists;
 import gg.eilsapgroup.milkshake.MKConfig;
 import gg.eilsapgroup.milkshake.TaskException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.RecursiveAction;
@@ -34,8 +32,8 @@ public class ParallelListTraverse<E> extends RecursiveAction {
         this.end = end;
     }
 
-    public ParallelListTraverse(Set<E> list, int threads,Consumer<E> action) {
-        this(Lists.newArrayList(list),threads,action);
+    public ParallelListTraverse(Set<E> set, int threads,Consumer<E> action) {
+        this(new ArrayList<>(set),threads,action);
     }
 
     public ParallelListTraverse(List<E> list, int threads,Consumer<E> action) {
