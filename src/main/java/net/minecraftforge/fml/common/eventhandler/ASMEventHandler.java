@@ -74,8 +74,7 @@ public class ASMEventHandler implements IEventListener {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public synchronized void invoke(Event event) {
-
+    public void invoke(Event event) {
         if (GETCONTEXT)
             ThreadContext.put("mod", owner == null ? "" : owner.getName());
         if (handler != null) {
