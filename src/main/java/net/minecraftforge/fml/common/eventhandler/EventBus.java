@@ -148,31 +148,28 @@ public class EventBus implements IEventExceptionHandler {
         }
     }
 
-    private final Object postLock = new Object();
-
     public boolean post(Event event) {
-        synchronized (postLock){
-            if (shutdown) return false;
 
-            // CatServer start - CatAPI implement
-            if (Bukkit.getServer() != null && ForgeEvent.getHandlerList().getRegisteredListeners().length > 0) {
-                Bukkit.getPluginManager().callEvent(new ForgeEvent(event));
-            }
-            // CatServer end
+        if (shutdown) return false;
 
-            IEventListener[] listeners = event.getListenerList().getListeners(busID);
-            int index = 0;
-            try {
-                for (; index < listeners.length; index++) {
-                    listeners[index].invoke(event);
-                }
-            } catch (Throwable throwable) {
-                exceptionHandler.handleException(this, event, listeners, index, throwable);
-                Throwables.throwIfUnchecked(throwable);
-                throw new RuntimeException(throwable);
-            }
-            return event.isCancelable() && event.isCanceled();
+        // CatServer start - CatAPI implement
+        if (Bukkit.getServer() != null && ForgeEvent.getHandlerList().getRegisteredListeners().length > 0) {
+            Bukkit.getPluginManager().callEvent(new ForgeEvent(event));
         }
+        // CatServer end
+
+        IEventListener[] listeners = event.getListenerList().getListeners(busID);
+        int index = 0;
+        try {
+            for (; index < listeners.length; index++) {
+                listeners[index].invoke(event);
+            }
+        } catch (Throwable throwable) {
+            exceptionHandler.handleException(this, event, listeners, index, throwable);
+            Throwables.throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable);
+        }
+        return event.isCancelable() && event.isCanceled();
     }
 
     public void shutdown() {
