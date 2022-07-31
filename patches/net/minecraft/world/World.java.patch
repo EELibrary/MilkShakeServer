@@ -53,7 +53,7 @@
  import net.minecraft.pathfinding.PathWorldListener;
  import net.minecraft.profiler.Profiler;
  import net.minecraft.scoreboard.Scoreboard;
-@@ -43,38 +59,57 @@
+@@ -43,42 +59,61 @@
  import net.minecraft.util.ReportedException;
  import net.minecraft.util.SoundCategory;
  import net.minecraft.util.SoundEvent;
@@ -125,6 +125,11 @@
      protected final IntHashMap<Entity> entitiesById = new IntHashMap<Entity>();
      private final long cloudColour = 16777215L;
      private int skylightSubtracted;
+-    protected int updateLCG = (new Random()).nextInt();
++    protected AtomicInteger updateLCG = new AtomicInteger((new Random()).nextInt());
+     protected final int DIST_HASH_MAGIC = 1013904223;
+     public float prevRainingStrength;
+     public float rainingStrength;
 @@ -86,31 +121,150 @@
      public float thunderingStrength;
      private int lastLightningBolt;
