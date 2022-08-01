@@ -438,7 +438,7 @@
          this.profiler.endSection();
      }
  
-+    private final ForkJoinPool chunkExecutor = new ForkJoinPool(MKConfig.executorConfig.getInt("env-worker-threads"), MKConfig.serverWorkerFactory,null,true);
++    private static final ForkJoinPool chunkExecutor = new ForkJoinPool(MKConfig.executorConfig.getInt("env-worker-threads"), MKConfig.serverWorkerFactory,null,true);
 +
      protected void updateBlocks()
      {

@@ -1,6 +1,10 @@
 package org.prawa.simpleutils.concurrent.forkjointasks;
 
-import java.util.Spliterator;
+import com.google.common.collect.Lists;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.RecursiveAction;
 import java.util.function.Consumer;
 
@@ -10,35 +14,73 @@ import java.util.function.Consumer;
  * @param <E>
  */
 public class ConcurrentlyTraverse<E> extends RecursiveAction {
-    private final Spliterator<E> spliterator;
+    private final List<E> list;
+    private final int start;
+    private final int end;
     private final Consumer<E> action;
-    private final long threshold;
+    private final int threshold;
 
-    public ConcurrentlyTraverse(Iterable<E> iterable,int threads,Consumer<E> action){
-        this.spliterator = iterable.spliterator();
+    public ConcurrentlyTraverse(List<E> list, Consumer<E> action, int taskPerThread) {
         this.action = action;
-        this.threshold = (int)iterable.spliterator().getExactSizeIfKnown() / threads;
+        this.list = list;
+        this.threshold = taskPerThread;
+        this.start = 0;
+        this.end = list.size();
     }
 
-    private ConcurrentlyTraverse(Spliterator<E> spliterator,Consumer<E> action,long t) {
-        this.spliterator = spliterator;
+    private ConcurrentlyTraverse(List<E> list, Consumer<E> action, int start, int end, int taskPerThread) {
         this.action = action;
-        this.threshold = t;
+        this.list = list;
+        this.threshold = taskPerThread;
+        this.start = start;
+        this.end = end;
+    }
+
+    public ConcurrentlyTraverse(List<E> list, int threads,Consumer<E> action) {
+        this.action = action;
+        this.list = list;
+        int taskPerThread = list.size() / threads;
+        if (taskPerThread < 2) {
+            taskPerThread = 2;
+        }
+        this.threshold = taskPerThread;
+        this.start = 0;
+        this.end = list.size();
+    }
+
+    public ConcurrentlyTraverse(Set<E> set,int nthreads,Consumer<E> action){
+        this(new ArrayList<>(set),nthreads,action);
+    }
+
+    public ConcurrentlyTraverse(Iterable<E> iterable, int threads,Consumer<E> action) {
+        this.action = action;
+        this.list = Lists.newArrayList(iterable);
+        int taskPerThread = list.size() / threads;
+        if (taskPerThread < 2) {
+            taskPerThread = 2;
+        }
+        this.threshold = taskPerThread;
+        this.start = 0;
+        this.end = list.size();
     }
 
     @Override
     protected void compute() {
-        if (this.spliterator.getExactSizeIfKnown() <= this.threshold) {
-            this.spliterator.forEachRemaining(o->{
-                try {
-                    this.action.accept(o);
-                }catch (Exception e){
-                    e.printStackTrace();
+        try {
+            if (end - start < this.threshold) {
+                for (int i = start; i < end; i++) {
+                    try {
+                        this.action.accept(list.get(i));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            });
-        } else {
-            new ConcurrentlyTraverse<>(this.spliterator.trySplit(), this.action, this.threshold).fork();
-            new ConcurrentlyTraverse<>(this.spliterator, this.action, this.threshold).fork();
+            } else {
+                int middle = (start + end) / 2;
+                invokeAll(new ConcurrentlyTraverse<>(list, this.action, start, middle, this.threshold), new ConcurrentlyTraverse<>(list, this.action, middle, end, this.threshold));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
