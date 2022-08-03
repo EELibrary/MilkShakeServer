@@ -1,5 +1,6 @@
 package gg.eilsapgroup.milkshake.executor;
 
+import gg.eilsapgroup.milkshake.MKConfig;
 import gg.eilsapgroup.milkshake.handler.ServerWorkerExceptionHandler;
 
 import java.util.concurrent.ForkJoinPool;
@@ -17,6 +18,7 @@ public class ServerWorkerWrapper implements ForkJoinPool.ForkJoinWorkerThreadFac
         fjwt.setUncaughtExceptionHandler(handler);
         handler.onThreadRegisted();
         fjwt.setName("MilkShake-Main-Worker # "+threadId.getAndIncrement());
+        MKConfig.workerGroup.regThread(fjwt);
         return fjwt;
     }
 
