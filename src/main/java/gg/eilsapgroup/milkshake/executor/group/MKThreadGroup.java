@@ -3,9 +3,6 @@ package gg.eilsapgroup.milkshake.executor.group;
 import net.himeki.mcmtfabric.parallelised.ConcurrentDoublyLinkedList;
 import java.util.List;
 
-/**
- * 一个简单的线程组，不过功能更多，主要给AsyncCatchers使用
- */
 public class MKThreadGroup{
     private final List<Thread> threads = new ConcurrentDoublyLinkedList<>();
 
