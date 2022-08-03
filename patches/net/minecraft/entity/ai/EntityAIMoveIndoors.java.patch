@@ -1,0 +1,10 @@
+--- ../src-base/minecraft/net/minecraft/entity/ai/EntityAIMoveIndoors.java
++++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAIMoveIndoors.java
+@@ -63,6 +63,7 @@
+     {
+         this.insidePosX = -1;
+         BlockPos blockpos = this.doorInfo.getInsideBlockPos();
++        if (blockpos == null)return;
+         int i = blockpos.getX();
+         int j = blockpos.getY();
+         int k = blockpos.getZ();
