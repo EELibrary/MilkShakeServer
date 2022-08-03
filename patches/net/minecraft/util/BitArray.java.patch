@@ -1,0 +1,35 @@
+--- ../src-base/minecraft/net/minecraft/util/BitArray.java
++++ ../src-work/minecraft/net/minecraft/util/BitArray.java
+@@ -19,7 +19,7 @@
+         this.longArray = new long[MathHelper.roundUp(arraySizeIn * bitsPerEntryIn, 64) / 64];
+     }
+ 
+-    public void setAt(int index, int value)
++    public synchronized void setAt(int index, int value)
+     {
+         Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)index);
+         Validate.inclusiveBetween(0L, this.maxEntryValue, (long)value);
+@@ -37,7 +37,7 @@
+         }
+     }
+ 
+-    public int getAt(int index)
++    public synchronized int getAt(int index)
+     {
+         Validate.inclusiveBetween(0L, (long)(this.arraySize - 1), (long)index);
+         int i = index * this.bitsPerEntry;
+@@ -56,12 +56,12 @@
+         }
+     }
+ 
+-    public long[] getBackingLongArray()
++    public synchronized long[] getBackingLongArray()
+     {
+         return this.longArray;
+     }
+ 
+-    public int size()
++    public synchronized int size()
+     {
+         return this.arraySize;
+     }

@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/pathfinding/PathFinder.java
++++ ../src-work/minecraft/net/minecraft/pathfinding/PathFinder.java
+@@ -11,7 +11,7 @@
+ public class PathFinder
+ {
+     private final PathHeap path = new PathHeap();
+-    private final Set<PathPoint> closedSet = Sets.<PathPoint>newHashSet();
++    private final Set<PathPoint> closedSet = Sets.<PathPoint>newConcurrentHashSet();
+     private final PathPoint[] pathOptions = new PathPoint[32];
+     private final NodeProcessor nodeProcessor;
+ 
