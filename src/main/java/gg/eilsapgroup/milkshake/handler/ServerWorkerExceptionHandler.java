@@ -1,6 +1,5 @@
 package gg.eilsapgroup.milkshake.handler;
 
-import gg.eilsapgroup.milkshake.MKConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +13,6 @@ public class ServerWorkerExceptionHandler implements Thread.UncaughtExceptionHan
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         LOGGER.warn("Error detected in workers!",e);
-        MKConfig.errorLogsRecoder.addErrorMessage(e.toString());
         errorDetected.getAndIncrement();
     }
 

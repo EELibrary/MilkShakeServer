@@ -31,17 +31,13 @@
  
          for (int i = 0; i < 3; ++i)
          {
-@@ -83,12 +83,8 @@
- 
-     public void applyModifier(AttributeModifier modifier)
+@@ -85,7 +85,8 @@
      {
--        if (this.getModifier(modifier.getID()) != null)
-+        if (this.getModifier(modifier.getID()) == null)
+         if (this.getModifier(modifier.getID()) != null)
          {
 -            throw new IllegalArgumentException("Modifier is already applied on this attribute!");
--        }
--        else
--        {
-             Set<AttributeModifier> set = (Set)this.mapByName.get(modifier.getName());
- 
-             if (set == null)
++            new IllegalArgumentException("Modifier is already applied on this attribute!").printStackTrace();
++            // throw new IllegalArgumentException("Modifier is already applied on this attribute!");
+         }
+         else
+         {
