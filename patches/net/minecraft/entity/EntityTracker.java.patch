@@ -15,7 +15,7 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
-+import org.prawa.simpleutils.concurrent.forkjointasks.ConcurrentlyTraverse;
++import org.prawa.simpleutils.concurrent.forkjointasks.ParallelListTraverse;
  
  public class EntityTracker
  {
@@ -121,7 +121,7 @@
      public void tick()
      {
 -        List<EntityPlayerMP> list = Lists.<EntityPlayerMP>newArrayList();
-+        ConcurrentlyTraverse<EntityTrackerEntry> task = new ConcurrentlyTraverse<>(this.entries,trackerExecutor.getParallelism(), entitytrackerentry->{
++        ParallelListTraverse<EntityTrackerEntry> task = new ParallelListTraverse<>(this.entries,trackerExecutor.getParallelism(),entitytrackerentry->{
 +            MKConfig.workerGroup.regThread();
 +            try{
 +                entitytrackerentry.updatePlayerList(this.world.playerEntities);
@@ -206,7 +206,7 @@
 -
 -        for (EntityTrackerEntry entitytrackerentry : this.entries)
 -        {
-+        ConcurrentlyTraverse<EntityTrackerEntry> task = new ConcurrentlyTraverse<>(this.entries,this.trackerExecutor.getParallelism(),entitytrackerentry->{
++        ParallelListTraverse<EntityTrackerEntry> task = new ParallelListTraverse<>(this.entries,this.trackerExecutor.getParallelism(),entitytrackerentry->{
              Entity entity = entitytrackerentry.getTrackedEntity();
  
              if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z)
