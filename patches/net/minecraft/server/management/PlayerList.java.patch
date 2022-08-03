@@ -66,16 +66,17 @@
  
  public abstract class PlayerList
  {
-@@ -76,7 +99,7 @@
+@@ -76,15 +99,15 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
      private final MinecraftServer mcServer;
 -    private final List<EntityPlayerMP> playerEntityList = Lists.<EntityPlayerMP>newArrayList();
+-    private final Map<UUID, EntityPlayerMP> uuidToPlayerMap = Maps.<UUID, EntityPlayerMP>newHashMap();
 +    public final List<EntityPlayerMP> playerEntityList = new java.util.concurrent.CopyOnWriteArrayList<>(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
-     private final Map<UUID, EntityPlayerMP> uuidToPlayerMap = Maps.<UUID, EntityPlayerMP>newHashMap();
++    private final Map<UUID, EntityPlayerMP> uuidToPlayerMap = Maps.<UUID, EntityPlayerMP>newConcurrentMap();
      private final UserListBans bannedPlayers;
      private final UserListIPBans bannedIPs;
-@@ -84,7 +107,7 @@
+     private final UserListOps ops;
      private final UserListWhitelist whiteListedPlayers;
      private final Map<UUID, StatisticsManagerServer> playerStatFiles;
      private final Map<UUID, PlayerAdvancements> advancements;
@@ -426,7 +427,7 @@
      }
  
      public String allowUserToConnect(SocketAddress address, GameProfile profile)
-@@ -430,6 +620,87 @@
+@@ -430,6 +620,85 @@
          }
      }
  
@@ -439,17 +440,15 @@
 +
 +        EntityPlayerMP entityplayer;
 +
-+        for (int i = 0; i < this.playerEntityList.size(); ++i) {
-+            entityplayer = (EntityPlayerMP) this.playerEntityList.get(i);
++        for (EntityPlayerMP playerMP : this.playerEntityList) {
++            entityplayer = (EntityPlayerMP) playerMP;
 +            if (entityplayer.getUniqueID().equals(uuid)) {
 +                arraylist.add(entityplayer);
 +            }
 +        }
 +
-+        Iterator<EntityPlayerMP> iterator = arraylist.iterator();
-+
-+        while (iterator.hasNext()) {
-+            entityplayer = (EntityPlayerMP) iterator.next();
++        for (EntityPlayerMP entityPlayerMP : arraylist) {
++            entityplayer = entityPlayerMP;
 +            writePlayerData(entityplayer); // CraftBukkit - Force the player's inventory to be saved
 +            entityplayer.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login", new Object[0]));
 +        }
@@ -514,7 +513,7 @@
      public EntityPlayerMP createPlayerForUser(GameProfile profile)
      {
          UUID uuid = EntityPlayer.getUUID(profile);
-@@ -471,15 +742,99 @@
+@@ -471,15 +740,99 @@
          return new EntityPlayerMP(this.mcServer, this.mcServer.getWorld(0), profile, playerinteractionmanager);
      }
  
@@ -617,7 +616,7 @@
          playerIn.dimension = dimension;
          PlayerInteractionManager playerinteractionmanager;
  
-@@ -493,8 +848,14 @@
+@@ -493,8 +846,14 @@
          }
  
          EntityPlayerMP entityplayermp = new EntityPlayerMP(this.mcServer, this.mcServer.getWorld(playerIn.dimension), playerIn.getGameProfile(), playerinteractionmanager);
@@ -632,7 +631,7 @@
          entityplayermp.setEntityId(playerIn.getEntityId());
          entityplayermp.setCommandStats(playerIn);
          entityplayermp.setPrimaryHand(playerIn.getPrimaryHand());
-@@ -504,44 +865,103 @@
+@@ -504,44 +863,103 @@
              entityplayermp.addTag(s);
          }
  
@@ -757,7 +756,7 @@
          return entityplayermp;
      }
  
-@@ -549,44 +969,125 @@
+@@ -549,44 +967,125 @@
      {
          GameProfile gameprofile = player.getGameProfile();
          int i = this.canSendCommands(gameprofile) ? this.ops.getPermissionLevel(gameprofile) : 0;
@@ -896,7 +895,7 @@
          {
              d0 = MathHelper.clamp(d0 / 8.0D, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
              d1 = MathHelper.clamp(d1 / 8.0D, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-@@ -597,7 +1098,7 @@
+@@ -597,7 +1096,7 @@
                  oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
              }
          }
@@ -905,7 +904,7 @@
          {
              d0 = MathHelper.clamp(d0 * 8.0D, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
              d1 = MathHelper.clamp(d1 * 8.0D, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-@@ -608,7 +1109,7 @@
+@@ -608,7 +1107,7 @@
                  oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
              }
          }
@@ -914,7 +913,7 @@
          {
              BlockPos blockpos;
  
-@@ -634,7 +1135,7 @@
+@@ -634,7 +1133,7 @@
  
          oldWorldIn.profiler.endSection();
  
@@ -923,7 +922,7 @@
          {
              oldWorldIn.profiler.startSection("placing");
              d0 = (double)MathHelper.clamp((int)d0, -29999872, 29999872);
-@@ -643,7 +1144,8 @@
+@@ -643,7 +1142,8 @@
              if (entityIn.isEntityAlive())
              {
                  entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
@@ -933,7 +932,7 @@
                  toWorldIn.spawnEntity(entityIn);
                  toWorldIn.updateEntityWithOptionalForce(entityIn, false);
              }
-@@ -654,11 +1156,155 @@
+@@ -654,11 +1154,154 @@
          entityIn.setWorld(toWorldIn);
      }
  
@@ -1076,7 +1075,6 @@
          if (++this.playerPingIndex > 600)
          {
 -            this.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_LATENCY, this.playerEntityList));
-+            // this.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_LATENCY, this.playerEntityList));
 +            for (int i = 0; i < this.playerEntityList.size(); ++i) {
 +                final EntityPlayerMP target = this.playerEntityList.get(i);
 +
@@ -1090,7 +1088,7 @@
              this.playerPingIndex = 0;
          }
      }
-@@ -671,6 +1317,24 @@
+@@ -671,6 +1314,24 @@
          }
      }
  
@@ -1115,7 +1113,7 @@
      public void sendPacketToAllPlayersInDimension(Packet<?> packetIn, int dimension)
      {
          for (int i = 0; i < this.playerEntityList.size(); ++i)
-@@ -786,12 +1450,20 @@
+@@ -786,12 +1447,20 @@
          int i = this.mcServer.getOpPermissionLevel();
          this.ops.addEntry(new UserListOpsEntry(profile, this.mcServer.getOpPermissionLevel(), this.ops.bypassesPlayerLimit(profile)));
          this.sendPlayerPermissionLevel(this.getPlayerByUUID(profile.getId()), i);
@@ -1136,7 +1134,7 @@
      }
  
      private void sendPlayerPermissionLevel(EntityPlayerMP player, int permLevel)
-@@ -824,7 +1496,7 @@
+@@ -824,7 +1493,7 @@
  
      public boolean canSendCommands(GameProfile profile)
      {
@@ -1145,7 +1143,7 @@
      }
  
      @Nullable
-@@ -847,6 +1519,12 @@
+@@ -847,6 +1516,12 @@
          {
              EntityPlayerMP entityplayermp = this.playerEntityList.get(i);
  
@@ -1158,7 +1156,7 @@
              if (entityplayermp != except && entityplayermp.dimension == dimension)
              {
                  double d0 = x - entityplayermp.posX;
-@@ -905,7 +1583,7 @@
+@@ -905,7 +1580,7 @@
  
      public void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn)
      {
@@ -1167,7 +1165,7 @@
          playerIn.connection.sendPacket(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.INITIALIZE));
          playerIn.connection.sendPacket(new SPacketTimeUpdate(worldIn.getTotalWorldTime(), worldIn.getWorldTime(), worldIn.getGameRules().getBoolean("doDaylightCycle")));
          BlockPos blockpos = worldIn.getSpawnPoint();
-@@ -913,16 +1591,21 @@
+@@ -913,16 +1588,21 @@
  
          if (worldIn.isRaining())
          {
@@ -1193,7 +1191,7 @@
          playerIn.connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
      }
  
-@@ -938,7 +1621,7 @@
+@@ -938,7 +1618,7 @@
  
      public String[] getAvailablePlayerDat()
      {
@@ -1202,7 +1200,7 @@
      }
  
      public void setWhiteListEnabled(boolean whitelistEnabled)
-@@ -1004,17 +1687,26 @@
+@@ -1004,17 +1684,26 @@
  
      public void removeAllPlayers()
      {
@@ -1233,7 +1231,7 @@
      }
  
      public void sendMessage(ITextComponent component)
-@@ -1022,6 +1714,7 @@
+@@ -1022,6 +1711,7 @@
          this.sendMessage(component, true);
      }
  
@@ -1241,7 +1239,7 @@
      public StatisticsManagerServer getPlayerStatsFile(EntityPlayer playerIn)
      {
          UUID uuid = playerIn.getUniqueID();
-@@ -1050,6 +1743,8 @@
+@@ -1050,6 +1740,8 @@
          return statisticsmanagerserver;
      }
  
@@ -1250,7 +1248,7 @@
      public PlayerAdvancements getPlayerAdvancements(EntityPlayerMP p_192054_1_)
      {
          UUID uuid = p_192054_1_.getUniqueID();
-@@ -1073,7 +1768,7 @@
+@@ -1073,7 +1765,7 @@
  
          if (this.mcServer.worlds != null)
          {
