@@ -8,6 +8,7 @@
 ## 多线程魔改过的部分
  1.实体和方块实体多线程更新\
  2.异步时间同步(说实话这个跟没有一样)\
- 3.多线程tracker\
- 4.同步的PathHeap\
- 5.部分多线程的ChunkProvider
+ 3.多线程随机刻\
+ 4.多线程tracker\
+ 5.同步的PathHeap\
+ 6.部分多线程的ChunkProvider
