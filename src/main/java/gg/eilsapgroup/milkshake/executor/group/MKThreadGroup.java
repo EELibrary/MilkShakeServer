@@ -1,13 +1,13 @@
 package gg.eilsapgroup.milkshake.executor.group;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import net.himeki.mcmtfabric.parallelised.ConcurrentDoublyLinkedList;
+import java.util.List;
 
 /**
  * 一个简单的线程组，不过功能更多，主要给AsyncCatchers使用
  */
 public class MKThreadGroup{
-    private final Set<Thread> threads = ConcurrentHashMap.newKeySet();
+    private final List<Thread> threads = new ConcurrentDoublyLinkedList<>();
 
     public boolean contains(Thread thread){
         return this.threads.contains(thread);
@@ -47,6 +47,10 @@ public class MKThreadGroup{
     
     public void interruptAll(){
         this.threads.parallelStream().forEach(Thread::interrupt);
+    }
+
+    public List<Thread> getAllThreads(){
+        return this.threads;
     }
 
     public void notifyAllThreads(){

@@ -37,6 +37,7 @@ public class MKConfig {
                 executorConfig = config.createSection("executors");
                 executorConfig.set("entities-worker-threads",Runtime.getRuntime().availableProcessors()+2);
                 executorConfig.set("tracker-worker-threads",Runtime.getRuntime().availableProcessors());
+                executorConfig.set("env-worker-threads",Runtime.getRuntime().availableProcessors());
                 executorConfig.set("disable-async-catcher",false);
                 debugConfig = config.createSection("debug");
                 debugConfig.set("enable-error-logs",false);
