@@ -12,6 +12,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+/**
+ * 配置文件和错误日志记录器都在这个类里
+ */
 public class MKConfig {
     public static final ServerWorkerWrapper serverWorkerFactory = new ServerWorkerWrapper();
     public static final MiscWorkerWrapper serverMiscWorkerWrapper = new MiscWorkerWrapper();
@@ -23,6 +26,9 @@ public class MKConfig {
     public static final MKThreadGroup workerGroup = new MKThreadGroup();
     public static ErrorRecoder errorLogsRecoder = new ErrorRecoder();
 
+    /**
+     * 加载所有的配置或者初始化配置
+     */
     public static void init(){
         try{
             File configFile = new File("MKConfig.yml");
@@ -50,6 +56,9 @@ public class MKConfig {
         }
     }
 
+    /**
+     * 初始化错误记录器，只有当enable-error-logs为true时才会调用此方法
+     */
     public static void initErrorRecoder(){
         Thread errorLogRecoer = new Thread(errorLogsRecoder,"Milk-Shake-Worker-Error-Recoder");
         errorLogRecoer.start();

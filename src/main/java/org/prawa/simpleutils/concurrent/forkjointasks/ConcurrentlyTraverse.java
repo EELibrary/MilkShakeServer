@@ -4,6 +4,11 @@ import java.util.Spliterator;
 import java.util.concurrent.RecursiveAction;
 import java.util.function.Consumer;
 
+/**
+ * 一个简单地利用ForkJoinPool进行遍历的简单工具类，它并不像并行流遍历那样把集合拆成一份一份的遍历，
+ * 而是根据当前线程数量和集合大小自动分配每个线程的任务数量进行遍历
+ * @param <E>
+ */
 public class ConcurrentlyTraverse<E> extends RecursiveAction {
     private final Spliterator<E> spliterator;
     private final Consumer<E> action;
@@ -32,8 +37,8 @@ public class ConcurrentlyTraverse<E> extends RecursiveAction {
                 }
             });
         } else {
-            new ConcurrentlyTraverse<>(this.spliterator, this.action, this.threshold).fork();
             new ConcurrentlyTraverse<>(this.spliterator.trySplit(), this.action, this.threshold).fork();
+            new ConcurrentlyTraverse<>(this.spliterator, this.action, this.threshold).fork();
         }
     }
 }
