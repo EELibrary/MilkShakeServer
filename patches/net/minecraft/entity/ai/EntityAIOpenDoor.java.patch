@@ -1,0 +1,10 @@
+--- ../src-base/minecraft/net/minecraft/entity/ai/EntityAIOpenDoor.java
++++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAIOpenDoor.java
+@@ -29,6 +29,7 @@
+     {
+         if (this.closeDoor)
+         {
++            if (this.doorBlock == null || this.entity == null)return;
+             this.doorBlock.toggleDoor(this.entity.world, this.doorPosition, false);
+         }
+     }
