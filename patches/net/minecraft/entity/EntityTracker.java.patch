@@ -53,7 +53,7 @@
          }
          else if (entityIn instanceof EntityEnderCrystal)
          {
-@@ -215,13 +222,14 @@
+@@ -215,11 +222,13 @@
  
      public void track(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates)
      {
@@ -66,11 +66,9 @@
 -                throw new IllegalStateException("Entity is already tracked!");
 +                return;
              }
--
+ 
              EntityTrackerEntry entitytrackerentry = new EntityTrackerEntry(entityIn, trackingRange, this.maxTrackingDistanceThreshold, updateFrequency, sendVelocityUpdates);
-             this.entries.add(entitytrackerentry);
-             this.trackedEntityHashTable.addKey(entityIn.getEntityId(), entitytrackerentry);
-@@ -229,39 +237,13 @@
+@@ -229,39 +238,13 @@
          }
          catch (Throwable throwable)
          {
@@ -112,7 +110,7 @@
          if (entityIn instanceof EntityPlayerMP)
          {
              EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
-@@ -281,37 +263,34 @@
+@@ -281,37 +264,45 @@
          }
      }
  
@@ -121,15 +119,16 @@
      public void tick()
      {
 -        List<EntityPlayerMP> list = Lists.<EntityPlayerMP>newArrayList();
++        Set<EntityPlayerMP> tempCacheSet = ConcurrentHashMap.newKeySet();
+ 
+-        for (EntityTrackerEntry entitytrackerentry : this.entries)
+-        {
+-            entitytrackerentry.updatePlayerList(this.world.playerEntities);
 +        ParallelListTraverse<EntityTrackerEntry> task = new ParallelListTraverse<>(this.entries,trackerExecutor.getParallelism(),entitytrackerentry->{
 +            MKConfig.workerGroup.regThread();
 +            try{
 +                entitytrackerentry.updatePlayerList(this.world.playerEntities);
  
--        for (EntityTrackerEntry entitytrackerentry : this.entries)
--        {
--            entitytrackerentry.updatePlayerList(this.world.playerEntities);
--
 -            if (entitytrackerentry.playerEntitiesUpdated)
 -            {
 -                Entity entity = entitytrackerentry.getTrackedEntity();
@@ -138,10 +137,19 @@
 +                if (entitytrackerentry.playerEntitiesUpdated)
                  {
 -                    list.add((EntityPlayerMP)entity);
--                }
--            }
--        }
 +                    Entity entity = entitytrackerentry.getTrackedEntity();
++
++                    if (entity instanceof EntityPlayerMP)
++                    {
++                        tempCacheSet.add((EntityPlayerMP)entity);
++                    }
+                 }
++            }finally {
++                MKConfig.workerGroup.removeThread();
+             }
+-        }
++        });
++        trackerExecutor.submit(task).join();
  
 -        for (int i = 0; i < list.size(); ++i)
 -        {
@@ -152,14 +160,12 @@
 -                if (entitytrackerentry1.getTrackedEntity() != entityplayermp)
 -                {
 -                    entitytrackerentry1.updatePlayerEntity(entityplayermp);
-+                    if (entity instanceof EntityPlayerMP)
-+                    {
-+                        EntityPlayerMP entityplayermp = ((EntityPlayerMP) entity);
-+                        for (EntityTrackerEntry entitytrackerentry1 : this.entries) {
-+                            if (entitytrackerentry1.getTrackedEntity() != entityplayermp) {
-+                                entitytrackerentry1.updatePlayerEntity(entityplayermp);
-+                            }
-+                        }
++        ParallelListTraverse<EntityPlayerMP> task2 = new ParallelListTraverse<EntityPlayerMP>(tempCacheSet,trackerExecutor.getParallelism(),entityplayermp->{
++            MKConfig.workerGroup.regThread();
++            try{
++                for (EntityTrackerEntry entitytrackerentry1 : this.entries) {
++                    if (entitytrackerentry1.getTrackedEntity() != entityplayermp) {
++                        entitytrackerentry1.updatePlayerEntity(entityplayermp);
 +                    }
                  }
 +            }finally {
@@ -167,11 +173,11 @@
              }
 -        }
 +        });
-+        trackerExecutor.submit(task).join();
++        trackerExecutor.submit(task2).join();
      }
  
      public void updateVisibility(EntityPlayerMP player)
-@@ -339,6 +318,25 @@
+@@ -339,6 +330,25 @@
          }
      }
  
@@ -197,52 +203,3 @@
      public void sendToTrackingAndSelf(Entity entityIn, Packet<?> packetIn)
      {
          EntityTrackerEntry entitytrackerentry = this.trackedEntityHashTable.lookup(entityIn.getEntityId());
-@@ -359,11 +357,7 @@
- 
-     public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunkIn)
-     {
--        List<Entity> list = Lists.<Entity>newArrayList();
--        List<Entity> list1 = Lists.<Entity>newArrayList();
--
--        for (EntityTrackerEntry entitytrackerentry : this.entries)
--        {
-+        ParallelListTraverse<EntityTrackerEntry> task = new ParallelListTraverse<>(this.entries,this.trackerExecutor.getParallelism(),entitytrackerentry->{
-             Entity entity = entitytrackerentry.getTrackedEntity();
- 
-             if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z)
-@@ -372,31 +366,16 @@
- 
-                 if (entity instanceof EntityLiving && ((EntityLiving)entity).getLeashHolder() != null)
-                 {
--                    list.add(entity);
-+                    player.connection.sendPacket(new SPacketEntityAttach(entity, ((EntityLiving)entity).getLeashHolder()));
-                 }
- 
-                 if (!entity.getPassengers().isEmpty())
-                 {
--                    list1.add(entity);
-+                    player.connection.sendPacket(new SPacketSetPassengers(entity));
-                 }
-             }
--        }
--
--        if (!list.isEmpty())
--        {
--            for (Entity entity1 : list)
--            {
--                player.connection.sendPacket(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
--            }
--        }
--
--        if (!list1.isEmpty())
--        {
--            for (Entity entity2 : list1)
--            {
--                player.connection.sendPacket(new SPacketSetPassengers(entity2));
--            }
--        }
-+        });
-+        this.trackerExecutor.submit(task).join();
-     }
- 
-     public void setViewDistance(int p_187252_1_)
