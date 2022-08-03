@@ -14,7 +14,7 @@
  import net.minecraft.crash.CrashReport;
  import net.minecraft.crash.CrashReportCategory;
  import net.minecraft.crash.ICrashReportDetail;
-@@ -47,364 +50,292 @@
+@@ -47,364 +50,291 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -27,7 +27,6 @@
 + * This code is forked from Atom Server
 + */
 +public class EntityTracker {
-+    private static final ForkJoinPool trackerExecutor = new ForkJoinPool(MKConfig.executorConfig.getInt("tracker-worker-threads"),MKConfig.serverWorkerFactory,null,true);
      private static final Logger LOGGER = LogManager.getLogger();
      private final WorldServer world;
 -    private final Set<EntityTrackerEntry> entries = Sets.<EntityTrackerEntry>newHashSet();
@@ -349,7 +348,7 @@
              entitytrackerentry1.sendDestroyEntityPacketToTrackedPlayers();
          }
      }
-+    private static final ThreadPool executor = new ThreadPool(trackerExecutor.getParallelism());
++    private static final ThreadPool executor = new ThreadPool(MKConfig.trackerPool.getParallelism());
  
 -    public void tick()
 -    {
@@ -359,7 +358,7 @@
 -        {
 +    public void tick() {
 +        waitForLock();lock();
-+        ConcurrentlyTraverse<EntityTrackerEntry> task = new ConcurrentlyTraverse<>(this.entries,trackerExecutor.getParallelism(), entitytrackerentry->{
++        ConcurrentlyTraverse<EntityTrackerEntry> task = new ConcurrentlyTraverse<>(this.entries,MKConfig.trackerPool.getParallelism(), entitytrackerentry->{
              entitytrackerentry.updatePlayerList(this.world.playerEntities);
 -
 -            if (entitytrackerentry.playerEntitiesUpdated)
@@ -394,7 +393,7 @@
 -            }
 -        }
 +        });
-+        trackerExecutor.submit(task).join();
++        MKConfig.trackerPool.submit(task).join();
 +        unlock();
      }
  
