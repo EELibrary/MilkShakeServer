@@ -75,9 +75,27 @@
      {
          if (!this.canNavigate())
          {
-@@ -148,11 +149,29 @@
+@@ -112,7 +113,7 @@
+     }
  
-     public boolean tryMoveToEntityLiving(Entity entityIn, double speedIn)
+     @Nullable
+-    public Path getPathToEntityLiving(Entity entityIn)
++    public synchronized Path getPathToEntityLiving(Entity entityIn)
+     {
+         if (!this.canNavigate())
+         {
+@@ -141,18 +142,36 @@
+         }
+     }
+ 
+-    public boolean tryMoveToXYZ(double x, double y, double z, double speedIn)
++    public synchronized boolean tryMoveToXYZ(double x, double y, double z, double speedIn)
+     {
+         return this.setPath(this.getPathToXYZ(x, y, z), speedIn);
+     }
+ 
+-    public boolean tryMoveToEntityLiving(Entity entityIn, double speedIn)
++    public synchronized boolean tryMoveToEntityLiving(Entity entityIn, double speedIn)
      {
 +        // Paper start - Pathfinding optimizations
 +        if (this.pathfindFailures > 10 && this.currentPath == null && MinecraftServer.currentTick < this.lastFailure + 40) {
@@ -107,7 +125,13 @@
      {
          if (pathentityIn == null)
          {
-@@ -189,7 +208,7 @@
+@@ -184,12 +203,12 @@
+     }
+ 
+     @Nullable
+-    public Path getPath()
++    public synchronized Path getPath()
+     {
          return this.currentPath;
      }
  

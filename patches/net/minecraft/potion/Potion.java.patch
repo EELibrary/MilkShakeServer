@@ -21,9 +21,8 @@
 +public class Potion extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<Potion>
  {
 -    public static final RegistryNamespaced<ResourceLocation, Potion> REGISTRY = new RegistryNamespaced<ResourceLocation, Potion>();
--    private final Map<IAttribute, AttributeModifier> attributeModifierMap = Maps.<IAttribute, AttributeModifier>newHashMap();
 +    public static final RegistryNamespaced<ResourceLocation, Potion> REGISTRY = net.minecraftforge.registries.GameData.getWrapper(Potion.class);
-+    private final Map<IAttribute, AttributeModifier> attributeModifierMap = Maps.<IAttribute, AttributeModifier>newConcurrentMap();
+     private final Map<IAttribute, AttributeModifier> attributeModifierMap = Maps.<IAttribute, AttributeModifier>newHashMap();
      private final boolean isBadEffect;
      private final int liquidColor;
      private String name = "";

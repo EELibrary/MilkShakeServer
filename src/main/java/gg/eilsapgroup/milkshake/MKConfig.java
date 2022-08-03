@@ -61,7 +61,7 @@ public class MKConfig {
      */
     public static void initErrorRecoder(){
         Thread errorLogRecoer = new Thread(errorLogsRecoder,"Milk-Shake-Worker-Error-Recoder");
-        errorLogRecoer.setDaemon(true);
         errorLogRecoer.start();
+        errorLogRecoer.setDaemon(true);
     }
 }
