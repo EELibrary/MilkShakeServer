@@ -987,9 +987,9 @@
 +    }
  
 +    //MilkShake -- Parallel entities updating XD
-+    private static final ForkJoinPool weatherEffectsEx = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
-+    private static final ForkJoinPool entityPool = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
-+    private static final ForkJoinPool tileEntityPool = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
++    private final ForkJoinPool weatherEffectsEx = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
++    private final ForkJoinPool entityPool = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
++    private final ForkJoinPool tileEntityPool = new ForkJoinPool(MKConfig.executorConfig.getInt("entities-worker-threads"),MKConfig.serverWorkerFactory,null,true);
 +
 +    public void updateEntities() {
 +        this.profiler.startSection("entities");
@@ -1022,7 +1022,7 @@
 +                wf_waiter.countDown();
 +            }
 +        });
-+        weatherEffectsEx.execute(weather_effects_tick_task);
++        this.weatherEffectsEx.execute(weather_effects_tick_task);
 +        try {
 +            wf_waiter.await(3000,TimeUnit.MILLISECONDS);
 +        } catch (InterruptedException e) {
@@ -1144,7 +1144,7 @@
 -
 -            this.profiler.endSection();
 +        });
-+        entityPool.execute(entity_tick_task);
++        this.entityPool.execute(entity_tick_task);
 +        try {
 +            entities_waiter.await(3000,TimeUnit.MILLISECONDS);
 +        } catch (InterruptedException e) {
