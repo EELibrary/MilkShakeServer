@@ -190,7 +190,32 @@
          this.world.profiler.startSection("sensing");
          this.senses.clearSensingCache();
          this.world.profiler.endSection();
-@@ -839,7 +912,6 @@
+@@ -749,12 +822,18 @@
+         this.world.profiler.startSection("goalSelector");
+         this.tasks.onUpdateTasks();
+         this.world.profiler.endSection();
+-        this.world.profiler.startSection("navigation");
+-        this.navigator.onUpdateNavigation();
+-        this.world.profiler.endSection();
+-        this.world.profiler.startSection("mob tick");
+-        this.updateAITasks();
+-        this.world.profiler.endSection();
++        this.world.profiler.startSection("navigation and mob tick");
++        try{
++            this.navigator.onUpdateNavigation();
++            this.updateAITasks();
++        }catch (NullPointerException p){
++            boolean matched = Arrays.stream(p.getStackTrace()).parallel().anyMatch(s-> s.getClassName().equals("net.minecraft.pathfinding.PathNavigate") || s.getClassName().equals("net.minecraft.pathfinding.NodeProcessor"));
++            if (!matched){
++                p.printStackTrace();
++            }
++        }finally {
++            this.world.profiler.endSection();
++        }
+ 
+         if (this.isRiding() && this.getRidingEntity() instanceof EntityLiving)
+         {
+@@ -839,7 +918,6 @@
          return !this.world.containsAnyLiquid(this.getEntityBoundingBox()) && this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this);
      }
  
@@ -198,7 +223,7 @@
      public float getRenderSizeModifier()
      {
          return 1.0F;
-@@ -991,6 +1063,8 @@
+@@ -991,6 +1069,8 @@
  
      public static EntityEquipmentSlot getSlotForItemStack(ItemStack stack)
      {
@@ -207,7 +232,7 @@
          if (stack.getItem() != Item.getItemFromBlock(Blocks.PUMPKIN) && stack.getItem() != Items.SKULL)
          {
              if (stack.getItem() instanceof ItemArmor)
-@@ -1003,7 +1077,7 @@
+@@ -1003,7 +1083,7 @@
              }
              else
              {
@@ -216,7 +241,7 @@
              }
          }
          else
-@@ -1178,12 +1252,12 @@
+@@ -1178,12 +1258,12 @@
  
      public boolean canPickUpLoot()
      {
@@ -231,7 +256,7 @@
      }
  
      public boolean isNoDespawnRequired()
-@@ -1195,6 +1269,10 @@
+@@ -1195,6 +1275,10 @@
      {
          if (this.getLeashed() && this.getLeashHolder() == player)
          {
@@ -242,7 +267,7 @@
              this.clearLeashed(true, !player.capabilities.isCreativeMode);
              return true;
          }
-@@ -1204,6 +1282,10 @@
+@@ -1204,6 +1288,10 @@
  
              if (itemstack.getItem() == Items.LEAD && this.canBeLeashedTo(player))
              {
@@ -253,7 +278,7 @@
                  this.setLeashHolder(player, true);
                  itemstack.shrink(1);
                  return true;
-@@ -1231,11 +1313,13 @@
+@@ -1231,11 +1319,13 @@
          {
              if (!this.isEntityAlive())
              {
@@ -267,7 +292,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1250,7 +1334,9 @@
+@@ -1250,7 +1340,9 @@
  
              if (!this.world.isRemote && dropLead)
              {
@@ -277,7 +302,7 @@
              }
  
              if (!this.world.isRemote && sendPacket && this.world instanceof WorldServer)
-@@ -1334,6 +1420,7 @@
+@@ -1334,6 +1426,7 @@
              }
              else
              {
@@ -285,7 +310,7 @@
                  this.clearLeashed(false, true);
              }
          }
-@@ -1434,5 +1521,19 @@
+@@ -1434,5 +1527,19 @@
          ON_GROUND,
          IN_AIR,
          IN_WATER;

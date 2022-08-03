@@ -31,3 +31,14 @@
      {
          return allowEmpty || !this.getChunkProvider().provideChunk(x, z).isEmpty();
      }
+@@ -306,8 +308,8 @@
+ 
+         if (this.ambienceTicks == 0)
+         {
+-            this.updateLCG = this.updateLCG * 3 + 1013904223;
+-            int i = this.updateLCG >> 2;
++            this.updateLCG.set(this.updateLCG.get() * 3 + 1013904223);
++            int i = this.updateLCG.get() >> 2;
+             int j = i & 15;
+             int k = i >> 8 & 15;
+             int l = i >> 16 & 255;
