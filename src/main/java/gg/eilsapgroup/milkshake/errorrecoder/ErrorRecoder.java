@@ -45,10 +45,9 @@ public class ErrorRecoder implements Runnable {
      * @param recordFileName
      */
     private void init(String recordFileName){
-        File file = new File(new File("mklogs"),recordFileName);
+        File file = new File(new File("logs"),recordFileName);
         try{
             if (!file.exists()){
-                file.mkdirs();
                 file.createNewFile();
             }else {
                 file.delete();
