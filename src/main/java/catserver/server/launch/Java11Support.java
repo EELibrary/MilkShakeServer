@@ -15,8 +15,7 @@ import java.util.List;
 
 public class Java11Support {
     public static boolean enable = false;
-    public static sun.misc
-            .Unsafe unsafe;
+    public static sun.misc.Unsafe unsafe;
 
     public static void setup() {
         enable = true;

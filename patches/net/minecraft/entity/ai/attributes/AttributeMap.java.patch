@@ -1,0 +1,55 @@
+--- ../src-base/minecraft/net/minecraft/entity/ai/attributes/AttributeMap.java
++++ ../src-work/minecraft/net/minecraft/entity/ai/attributes/AttributeMap.java
+@@ -8,7 +8,7 @@
+ 
+ public class AttributeMap extends AbstractAttributeMap
+ {
+-    private final Set<IAttributeInstance> dirtyInstances = Sets.<IAttributeInstance>newHashSet();
++    private final Set<IAttributeInstance> dirtyInstances = Sets.<IAttributeInstance>newConcurrentHashSet();
+     protected final Map<String, IAttributeInstance> instancesByName = new LowerStringMap();
+ 
+     public ModifiableAttributeInstance getAttributeInstance(IAttribute attribute)
+@@ -22,7 +22,9 @@
+ 
+         if (iattributeinstance == null)
+         {
+-            iattributeinstance = this.instancesByName.get(attributeName);
++            synchronized (this.instancesByName){
++                iattributeinstance = this.instancesByName.get(attributeName);
++            }
+         }
+ 
+         return (ModifiableAttributeInstance)iattributeinstance;
+@@ -34,7 +36,9 @@
+ 
+         if (attribute instanceof RangedAttribute && ((RangedAttribute)attribute).getDescription() != null)
+         {
+-            this.instancesByName.put(((RangedAttribute)attribute).getDescription(), iattributeinstance);
++            synchronized (this.instancesByName){
++                this.instancesByName.put(((RangedAttribute)attribute).getDescription(), iattributeinstance);
++            }
+         }
+ 
+         return iattributeinstance;
+@@ -52,13 +56,15 @@
+             this.dirtyInstances.add(instance);
+         }
+ 
+-        for (IAttribute iattribute : this.descendantsByParent.get(instance.getAttribute()))
+-        {
+-            ModifiableAttributeInstance modifiableattributeinstance = this.getAttributeInstance(iattribute);
+-
+-            if (modifiableattributeinstance != null)
++        synchronized (this.descendantsByParent){
++            for (IAttribute iattribute : this.descendantsByParent.get(instance.getAttribute()))
+             {
+-                modifiableattributeinstance.flagForUpdate();
++                ModifiableAttributeInstance modifiableattributeinstance = this.getAttributeInstance(iattribute);
++
++                if (modifiableattributeinstance != null)
++                {
++                    modifiableattributeinstance.flagForUpdate();
++                }
+             }
+         }
+     }
