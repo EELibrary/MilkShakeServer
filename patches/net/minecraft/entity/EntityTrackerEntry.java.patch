@@ -12,20 +12,6 @@
  public class EntityTrackerEntry
  {
      private static final Logger LOGGER = LogManager.getLogger();
-@@ -90,11 +94,11 @@
-     private boolean updatedPlayerVisibility;
-     private final boolean sendVelocityUpdates;
-     private int ticksSinceLastForcedTeleport;
--    private List<Entity> passengers = Collections.<Entity>emptyList();
-+    private List<Entity> passengers = Collections.synchronizedList(Collections.<Entity>emptyList());
-     private boolean ridingEntity;
-     private boolean onGround;
-     public boolean playerEntitiesUpdated;
--    public final Set<EntityPlayerMP> trackingPlayers = Sets.<EntityPlayerMP>newHashSet();
-+    public final Set<EntityPlayerMP> trackingPlayers = Sets.<EntityPlayerMP>newConcurrentHashSet();
- 
-     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn)
-     {
 @@ -148,23 +152,23 @@
          if (!list.equals(this.passengers))
          {
@@ -223,15 +209,7 @@
              }
          }
      }
-@@ -483,19 +559,24 @@
- 
-     public void updatePlayerEntities(List<EntityPlayer> players)
-     {
--        for (int i = 0; i < players.size(); ++i)
--        {
--            this.updatePlayerEntity((EntityPlayerMP)players.get(i));
-+        for (EntityPlayer player : players) {
-+            this.updatePlayerEntity((EntityPlayerMP) player);
+@@ -489,13 +565,19 @@
          }
      }
  
